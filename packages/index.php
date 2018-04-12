@@ -302,7 +302,7 @@ if (! $result = $mysql -> query(
     print "<td>" . $row["version"] . "</td>\n";
     print "<td>";
     if ($row["has_issues"])
-      print "bugs";
+      print "has open bug reports";
     else
       print "&nbsp;";
     print "</td>\n";
