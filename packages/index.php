@@ -112,7 +112,118 @@ if (isset($_GET["q"]))
     </form>
 </div>
 
+<?php
 
+$filter = " WHERE 1";
+if (isset($_GET["arch"])) {
+  $filter .= " AND `architectures`.`name` IN (";
+  foreach ($archs as $arch)
+    if (strpos("&".$_SERVER["QUERY_STRING"]."&", "&arch=".$arch."&") !== false)
+      $filter .= "\"" . $arch . "\",";
+  $filter .= "\"\")";
+}
+if (isset($_GET["repo"])) {
+  $filter .= " AND `repositories`.`name` IN (";
+  foreach ($repos as $repo)
+    if (strpos("&".$_SERVER["QUERY_STRING"]."&", "&repo=".$repo."&") !== false)
+      $filter .= "\"" . $repo . "\",";
+  $filter .= "\"\")";
+}
+if ($_GET["bugs"] == "Bugs")
+  $filter .= " AND `binary_packages`.`has_issues`";
+if ($_GET["bugs"] == "No Bugs")
+  $filter .= " AND NOT `binary_packages`.`has_issues`";
+
+if (isset($_GET["q"])) {
+  $exact_filter = " AND `binary_packages`.`pkgname` = from_base64(\"".base64_encode($_GET["q"])."\")";
+  $fuzzy_filter = " AND `binary_packages`.`pkgname` LIKE from_base64(\"".base64_encode("%".$_GET["q"]."%")."\")";
+} else {
+  $exact_filter = "";
+  $fuzzy_filter = "";
+}
+
+$query = " FROM `binary_packages`" .
+  " JOIN `architectures` ON `architectures`.`id`=`binary_packages`.`architecture`" .
+  " JOIN `repositories` ON `repositories`.`id`=`binary_packages`.`repository`" .
+  " AND `repositories`.`is_on_master_mirror`" .
+  $filter . $exact_filter .
+  " ORDER BY ";
+
+if (isset($_GET["sort"])) {
+  if (isset($sorts[$_GET["sort"]]["mysql"]))
+    $query .= $sorts[$_GET["sort"]]["mysql"] . ",";
+  elseif (isset($sorts[substr($_GET["sort"],1)]["mysql"]))
+    $query .= $sorts[substr($_GET["sort"],1)]["mysql"] . " DESC,";
+}
+
+$query .= "`binary_packages`.`pkgname`,`repositories`.`stability`,`repositories`.`name`,`architectures`.`name`";
+
+if (! $result = $mysql -> query(
+  "SELECT " .
+  "`binary_packages`.`pkgname`," .
+  "`repositories`.`name` AS `repo`," .
+  "`architectures`.`name` AS `arch`," .
+  "CONCAT(IF(`binary_packages`.`epoch`=\"0\",\"\",CONCAT(`binary_packages`.`epoch`,\":\"))," .
+  "`binary_packages`.`pkgver`,\"-\"," .
+  "`binary_packages`.`pkgrel`,\".\"," .
+  "`binary_packages`.`sub_pkgrel`) AS `version`," .
+  "IF(`binary_packages`.`has_issues`,1,0) AS `has_issues`" .
+  $query
+  ))
+  die ($mysql -> error);
+
+  function print_results() {
+    global $result;
+
+    $oddity="odd";
+    while ($row = $result -> fetch_assoc()) {
+      print "<tr class=\"" . $oddity . "\">\n";
+      print "<td>" . $row["arch"] . "</td>\n";
+      print "<td>" . $row["repo"] . "</td>\n";
+      print "<td><a href=\"/" . $row["repo"] . "/" . $row["arch"] . "/" . $row["pkgname"] ."/\" ";
+      print "title=\"View package details for " . $row["pkgname"] . "\">" . $row["pkgname"] ."</a></td>\n";
+      print "<td>" . $row["version"] . "</td>\n";
+      print "<td>";
+      if ($row["has_issues"])
+        print "has open bug reports";
+      else
+        print "&nbsp;";
+      print "</td>\n";
+      print "</tr>\n";
+      if ($oddity == "odd" )
+        $oddity = "even";
+      else
+        $oddity = "odd";
+    }
+  }
+
+if ($result -> num_rows > 0) {
+?>
+<div id="exact-matches" class="box">
+    <div class="pkglist-stats">
+        <p><?php print $result -> num_rows; ?> exact match<?php if ($result -> num_rows != 1) print "es"; ?> found.</p>
+    </div>
+    <table class="results">
+        <thead>
+            <tr>
+                <th>Arch</th>
+                <th>Repo</th>
+                <th>Name</th>
+                <th>Version</th>
+                <th>Bugs</th>
+            </tr>
+        </thead>
+        <tbody>
+<?php
+  print_results();
+?>
+        </tbody>
+    </table>
+</div>
+<?php
+}
+
+?>
 
 <div id="pkglist-results" class="box">
     
@@ -146,34 +257,11 @@ if (isset($_GET["q"]))
     )
   );
 
-
-$filter = " WHERE 1";
-if (isset($_GET["arch"])) {
-  $filter .= " AND `architectures`.`name` IN (";
-  foreach ($archs as $arch)
-    if (strpos("&".$_SERVER["QUERY_STRING"]."&", "&arch=".$arch."&") !== false)
-      $filter .= "\"" . $arch . "\",";
-  $filter .= "\"\")";
-}
-if (isset($_GET["repo"])) {
-  $filter .= " AND `repositories`.`name` IN (";
-  foreach ($repos as $repo)
-    if (strpos("&".$_SERVER["QUERY_STRING"]."&", "&repo=".$repo."&") !== false)
-      $filter .= "\"" . $repo . "\",";
-  $filter .= "\"\")";
-}
-if (isset($_GET["q"]))
-  $filter .= " AND `binary_packages`.`pkgname` LIKE from_base64(\"".base64_encode("%".$_GET["q"]."%")."\")";
-if ($_GET["bugs"] == "Bugs")
-  $filter .= " AND `binary_packages`.`has_issues`";
-if ($_GET["bugs"] == "No Bugs")
-  $filter .= " AND NOT `binary_packages`.`has_issues`";
-
 $query = " FROM `binary_packages`" .
   " JOIN `architectures` ON `architectures`.`id`=`binary_packages`.`architecture`" .
   " JOIN `repositories` ON `repositories`.`id`=`binary_packages`.`repository`" .
   " AND `repositories`.`is_on_master_mirror`" .
-  $filter .
+  $filter . $fuzzy_filter .
   " ORDER BY ";
 
 if (isset($_GET["sort"])) {
@@ -292,26 +380,7 @@ if (! $result = $mysql -> query(
     <tbody>
 <?php
 
-  $oddity="odd";
-  while ($row = $result -> fetch_assoc()) {
-    print "<tr class=\"" . $oddity . "\">\n";
-    print "<td>" . $row["arch"] . "</td>\n";
-    print "<td>" . $row["repo"] . "</td>\n";
-    print "<td><a href=\"/" . $row["repo"] . "/" . $row["arch"] . "/" . $row["pkgname"] ."/\" ";
-    print "title=\"View package details for " . $row["pkgname"] . "\">" . $row["pkgname"] ."</a></td>\n";
-    print "<td>" . $row["version"] . "</td>\n";
-    print "<td>";
-    if ($row["has_issues"])
-      print "has open bug reports";
-    else
-      print "&nbsp;";
-    print "</td>\n";
-    print "</tr>\n";
-    if ($oddity == "odd" )
-      $oddity = "even";
-    else
-      $oddity = "odd";
-  }
+  print_results();
 
 ?>                
     </tbody>
