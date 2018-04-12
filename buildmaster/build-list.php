@@ -199,7 +199,7 @@ if ($result -> num_rows > 0) {
 
     print "<tr>";
 
-    print "<td><a href=\"/scripts/dependencies.php?b=".$row["pkgbase"]."&r=build-list\">".$row["pkgbase_print"]."</a></td>";
+    print "<td><a href=\"/buildmaster/dependencies.php?b=".$row["pkgbase"]."&r=build-list\">".$row["pkgbase_print"]."</a></td>";
     print "<td><p style=\"font-size:8px\">".$row["git_revision"]."</p></td>";
     print "<td><p style=\"font-size:8px\">".$row["mod_git_revision"]."</p></td>";
     print "<td>".$row["package_repository"]."</td>";
