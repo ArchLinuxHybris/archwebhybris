@@ -96,16 +96,12 @@ if ($result -> num_rows > 0) {
     if (isset($reasons)) {
       $to_print="";
       foreach ($reasons as $reason => $last_log) {
-        if (file_exists("/srv/http/build-logs/error/".$last_log)) {
-          $to_print= $to_print .
-            ", <a href=\"https://buildmaster.archlinux32.org/build-logs/error/" .
-            $last_log .
-            "\">" .
-            $reason .
-            "</a>";
-        } else {
-          $to_print= $to_print . ", " . $reason;
-        }
+        $to_print= $to_print .
+          ", <a href=\"https://buildmaster.archlinux32.org/build-logs/error/" .
+          $last_log .
+          "\">" .
+          $reason .
+          "</a>";
       }
       $rows[$count]["fail_reasons"]=substr($to_print,2);
     } else {
