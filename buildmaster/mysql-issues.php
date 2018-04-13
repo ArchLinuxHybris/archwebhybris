@@ -4,7 +4,7 @@
 <link rel="stylesheet" type="text/css" href="/static/style.css">
 </head>
 <body>
-<a href="/">Start page</a><br>
+<a href="https://buildmaster.archlinux32.org/">Start page</a><br>
 <?php
 
   if (isset($_GET["ignore-haskell"]))

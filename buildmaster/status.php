@@ -1,12 +1,11 @@
 <html>
 <head>
+<title>Build master status</title>
+<link rel="stylesheet" type="text/css" href="/static/style.css">
+</head>
+<body>
+<a href="https://buildmaster.archlinux32.org/">Start page</a><br>
 <?php
-
-print "<title>Build master status</title>\n";
-print "<link rel=\"stylesheet\" type=\"text/css\" href=\"/static/style.css\">\n";
-print "</head>\n";
-print "<body>\n";
-print "<a href=\"/\">Start page</a><br>\n";
 
 $mysql = new mysqli("localhost", "webserver", "empty", "buildmaster");
 if ($mysql->connect_error) {
