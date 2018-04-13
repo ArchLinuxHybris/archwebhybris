@@ -20,8 +20,8 @@ print "<title>List of " . $to_show . " package builds</title>\n";
 print "<link rel=\"stylesheet\" type=\"text/css\" href=\"/static/style.css\">\n";
 print "</head>\n";
 print "<body>\n";
-print "<a href=\"/\">Start page</a>\n";
-print "<a href=\"/build-logs/\">build logs</a><br>\n";
+print "<a href=\"https://buildmaster.archlinux32.org/\">Start page</a>\n";
+print "<a href=\"https://buildmaster.archlinux32.org/build-logs/\">build logs</a><br>\n";
 
 $mysql = new mysqli("localhost", "webserver", "empty", "buildmaster");
 if ($mysql->connect_error) {
@@ -98,7 +98,7 @@ if ($result -> num_rows > 0) {
       foreach ($reasons as $reason => $last_log) {
         if (file_exists("/srv/http/build-logs/error/".$last_log)) {
           $to_print= $to_print .
-            ", <a href=\"/build-logs/error/" .
+            ", <a href=\"https://buildmaster.archlinux32.org/build-logs/error/" .
             $last_log .
             "\">" .
             $reason .
