@@ -158,7 +158,7 @@
     " JOIN `repository_stability_relations` ON `repository_stability_relations`.`less_stable`=`repositories`.`stability`" .
     " AND `repository_stability_relations`.`more_stable`=" . $mysql_content["repo_stability"] .
     " WHERE `install_target_providers`.`package`=" . $mysql_content["id"] .
-    " GROUP BY `binary_packages`.`id`"
+    " GROUP BY `binary_packages`.`id`" .
     " ORDER BY FIELD (`dependency_types`.`name`,\"run\",\"make\",\"check\",\"link\")"
     ))
     die_500("Query failed: " . $mysql->error);
