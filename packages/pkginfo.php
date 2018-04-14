@@ -109,8 +109,10 @@
     " AND NOT EXISTS (" .
       "SELECT 1 FROM `binary_packages` AS `subst_bp`" .
       " JOIN `repositories` AS `subst_r` ON `subst_bp`.`repository`=`subst_r`.`id`" .
+  // the substitue must be truly less stable than the dependency
       " JOIN `repository_stability_relations` AS `subst_rsr` ON `subst_rsr`.`less_stable`=`subst_r`.`stability`" .
       " AND `subst_rsr`.`less_stable`!=`subst_rsr`.`more_stable`" .
+  // and more (or equally) stable than us
       " JOIN `repository_stability_relations` AS `subst_rsr2` ON `subst_rsr2`.`more_stable`=`subst_r`.`stability`" .
       " WHERE `subst_bp`.`pkgname`=`binary_packages`.`pkgname`" .
       " AND `subst_rsr`.`more_stable`=`repositories`.`stability`" .
