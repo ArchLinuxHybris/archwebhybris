@@ -148,6 +148,7 @@
     "`binary_packages`.`pkgname`" .
     " FROM `install_target_providers`" .
     " JOIN `install_targets` ON `install_targets`.`id`=`install_target_providers`.`install_target`" .
+    " AND `install_targets`.`name` NOT IN (\"base\",\"base-devel\")" .
     " JOIN `dependencies` ON `install_target_providers`.`install_target`=`dependencies`.`depending_on`" .
     " JOIN `dependency_types` ON `dependency_types`.`id`=`dependencies`.`dependency_type`" .
     " JOIN `binary_packages` ON `dependencies`.`dependent`=`binary_packages`.`id`" .
