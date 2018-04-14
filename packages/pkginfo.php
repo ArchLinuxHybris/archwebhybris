@@ -344,55 +344,72 @@ if (count($elsewhere)>0) {
             <ul id="pkgdepslist">
 <?php
   foreach ($dependencies as $dep) {
-    if ($dep["dependency_type"]=="link")
-      continue;
     print "<li>\n";
-    var_dump($dep["deps"]);
-//    var_dump(json_decode($dep["dep"],true));
-    continue;
-    if (isset($dep["pkgname"])) {
-      if ($dep["pkgname"]!=$dep["install_target"]) {
+    if (count($dep["deps"]) == 0) {
+      print "<font color=\"#ff0000\">not satisfiable dependency: \"" . $dep["install_target"] . "\"</font>\n";
+    } else {
+      if (count($dep["deps"]) > 1) {
         print $dep["install_target"];
         print " <span class=\"virtual-dep\">(";
+      };
+      $first = true;
+      foreach ($dep["deps"] as $d_p) {
+        if (!$first)
+          print ",\n";
+        $first = false;
+        print "<a href=\"/".$d_p["repo"]."/".$d_p["arch"]."/".$d_p["pkgname"]."/\" ";
+        print "title=\"View package details for ".$d_p["pkgname"]."\">".$d_p["pkgname"]."</a>";
       }
-      print "<a href=\"/".$dep["repo"]."/".$dep["arch"]."/".$dep["pkgname"]."/\" ";
-      print "title=\"View package details for ".$dep["pkgname"]."\">".$dep["pkgname"]."</a>";
-      if ($dep["pkgname"]!=$dep["install_target"])
+      if (count($dep["deps"])>1)
         print ")</span>";
       print "\n";
-    } else {
-      print "<font color=\"#ff0000\">not satisfiable dependency: \"" . $dep["install_target"] . "\"</font>\n";
-    }
-    if ($dep["dependency_type"]=="make")
-      print "<span class=\"make-dep\"> (make)</span>\n";
+    };
+    if ($dep["dependency_type"]!="run")
+      print "<span class=\"" . $dep["dependency_type"] . "-dep\"> (" . $dep["dependency_type"] . ")</span>\n";
     print "</li>\n";
   }
-  die();
 ?>
-<!-- TODO
-<li>
-
-</li>
-<li>
-libminiupnpc.so=17-64 <span class="virtual-dep">(<a href="/packages/community/x86_64/miniupnpc/" title="View package details for miniupnpc">miniupnpc</a>
-)</span>
-
-</li>
-<li>
-wxgtk <span class="virtual-dep">(<a href="/packages/extra/x86_64/wxgtk2/" title="View package details for wxgtk2">wxgtk2</a>
-)</span>
-
-</li>
-<li>
--->
             </ul>
         </div>
         
         
         <div id="pkgreqs" class="listing">
-            <h3 title="Packages that require 0ad">
-                Required By (0)</h3>
-            
+            <h3 title="Packages that require <?php print $content["Name"]; ?>">
+                Required By (<?php print count($dependent); ?>)</h3>
+            <ul id="pkgreqslist">
+<?php
+  foreach ($dependent as $dep) {
+    print "<li>\n";
+    if (count($dep["deps"]) > 1) {
+      print $dep["install_target"];
+      print " <span class=\"virtual-dep\">(";
+    };
+    $first = true;
+    foreach ($dep["deps"] as $d_p) {
+      if (!$first)
+        print ",\n";
+      $first = false;
+      print "<a href=\"/".$d_p["repo"]."/".$d_p["arch"]."/".$d_p["pkgname"]."/\" ";
+      print "title=\"View package details for ".$d_p["pkgname"]."\">".$d_p["pkgname"]."</a>";
+    }
+    if (count($dep["deps"])>1)
+      print ")</span>";
+    print "\n";
+  };
+  if ($dep["dependency_type"]!="run")
+    print "<span class=\"" . $dep["dependency_type"] . "-dep\"> (" . $dep["dependency_type"] . ")</span>\n";
+  print "</li>\n";
+
+  foreach ($dependent as $d) {
+    print "<li><a href=\"/" . $d["repo"] . "/" . $d["arch"] . "/" . $d["pkgname"] . "/\"";
+    print " title=\"View package details for " . $d["pkgname"] . "\">" . $d["pkgname"] . "</a>\n";
+    if ($d["dependency_type"]=="make")
+      print "<span class=\"make-dep\"> (make)</span>\n";
+print " " . $d["install_target"];
+    print "</li>\n";
+  }
+?>
+            </ul>
         </div>
         
 <!--        <div id="pkgfiles" class="listing">
