@@ -41,12 +41,17 @@
     ") AS `version`," .
     "`repositories`.`stability` AS `repo_stability`," .
     "`repositories`.`name` AS `repo`," .
-    "`architectures`.`name` AS `arch`" .
+    "`architectures`.`name` AS `arch`," .
+    "`git_repositories`.`name` AS `git_repo`," .
+    "`package_sources`.`uses_upstream`," .
+    "`package_sources`.`uses_modification`" .
     " FROM `binary_packages`" .
     " JOIN `architectures` ON `binary_packages`.`architecture`=`architectures`.`id`" .
     " JOIN `repositories` ON `binary_packages`.`repository`=`repositories`.`id`" .
     " JOIN `build_assignments` ON `binary_packages`.`build_assignment`=`build_assignments`.`id`" .
     " JOIN `package_sources` ON `build_assignments`.`package_source`=`package_sources`.`id`" .
+    " JOIN `upstream_repositories` ON `package_sources`.`upstream_package_repository`=`upstream_repositories`.`id`" .
+    " JOIN `git_repositories` ON `upstream_repositories`.`git_repository`=`git_repositories`.`id`" .
     " WHERE `binary_packages`.`pkgname`=from_base64(\"" . base64_encode($_GET["pkgname"]) . "\")" .
     " AND `architectures`.`name`=from_base64(\"" . base64_encode($_GET["arch"]) . "\")" .
     " AND `repositories`.`name`=from_base64(\"" . base64_encode($_GET["repo"]) . "\")"
@@ -237,17 +242,49 @@
         <div id="actionlist">
         <h4>Package Actions</h4>
             <ul class="small">
-<!-- TODO
                 <li>
-                    <a href="https://projects.archlinux.org/svntogit/community.git/tree/trunk?h=packages/0ad" title="View source files for 0ad">Source Files</a> /
-                    <a href="https://projects.archlinux.org/svntogit/community.git/log/trunk?h=packages/0ad" title="View changes for 0ad">View Changes</a>
+<?php
+  if ($content["uses_upstream"]) {
+    print "<a href=\"https://projects.archlinux.org/svntogit/";
+    print $content["git_repo"];
+    print ".git/tree/trunk?h=packages/";
+    print $content["pkgbase"];
+    print "\" title=\"View upstream's source files for ";
+    print $content["pkgname"];
+    print "\">Upstream's Source Files</a> / ";
+    print "<a href=\"https://projects.archlinux.org/svntogit/";
+    print $content["git_repo"];
+    print ".git/log/trunk?h=packages/";
+    print $content["pkgbase"];
+    print "\" title=\"View upstream's changes for ";
+    print $content["pkgname"];
+    print "\">Upstream's Changes</a>";
+    if ($content["uses_modification"])
+      print "<br>\n";
+  }
+  if ($content["uses_modification"]) {
+    print "<a href=\"https://github.com/archlinux32/packages/tree/master/";
+    print $content["repo"];
+    print "/";
+    print $content["pkgbase"];
+    print "\" title=\"View archlinux32's source files for ";
+    print $content["pkgname"];
+    print "\">Archlinux32's Source Files</a> / ";
+    print "<a href=\"https://github.com/archlinux32/packages/commits/master/";
+    print $content["repo"];
+    print "/";
+    print $content["pkgbase"];
+    print "\" title=\"View upstream's changes for ";
+    print $content["pkgname"];
+    print "\">Archlinux32's Changes</a>";
+  }
+?>
                 </li>
+<!-- TODO
                 <li>
                     <a href="https://bugs.archlinux.org/?project=5&string=0ad" title="View existing bug tickets for 0ad">Bug Reports</a> /
                     <a href="https://bugs.archlinux.org/newtask?project=5&product_category=33&item_summary=%5B0ad%5D+PLEASE+ENTER+SUMMARY" title="Report new bug for 0ad">Add New Bug</a>
                 </li>
-                <li><a href="https://wiki.archlinux.org/index.php/Special:Search?search=0ad" title="Search wiki for 0ad">Search Wiki</a></li>
-                <li><a href="https://security.archlinux.org/package/0ad" title="View security issues for 0ad">Security Issues</a></li>
                 
                 <li><a href="flag/" title="Flag 0ad as out-of-date">Flag Package Out-of-Date</a>
                 <a href="/packages/flaghelp/"
@@ -390,17 +427,6 @@ if (count($elsewhere)>0) {
 ?>
             </ul>
         </div>
-        
-<!--        <div id="pkgfiles" class="listing">
-            <h3 title="Complete list of files contained within this package">
-                Package Contents</h3>
-            <div id="pkgfilelist">
-                <p><a id="filelink" href="files/"
-                    title="Click to view the complete file list for 0ad">
-                    View the file list for 0ad</a></p>
-            </div>
-        </div>
-    </div> -->
 </div>
 
 
