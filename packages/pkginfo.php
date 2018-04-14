@@ -439,7 +439,7 @@ if (count($elsewhere)>0) {
 ?>
             </ul>
         </div>
-        <div id="pkgfiles" class="listing">
+        <div id="pkgfiles">
         </div>
     </div>
 </div>
