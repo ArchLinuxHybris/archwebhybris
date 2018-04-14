@@ -340,11 +340,11 @@ if (count($elsewhere)>0) {
     <table id="pkginfo">
         <tr>
             <th>Architecture:</th>
-            <td><a href="/packages/?arch=<?php print $content["Architecture"]; ?>"
+            <td><a href="/?arch=<?php print $content["Architecture"]; ?>"
                     title="Browse packages for <?php print $content["Architecture"]; ?> architecture"><?php print $content["Architecture"]; ?></a></td>
         </tr><tr>
             <th>Repository:</th>
-            <td><a href="/packages/?repo=<?php print $content["Repository"]; ?>"
+            <td><a href="/?repo=<?php print $content["Repository"]; ?>"
                     title="Browse the <?php print $content["Repository"]; ?> repository"><?php print $content["Repository"]; ?></a></td>
         </tr>
         
@@ -465,7 +465,7 @@ if (count($elsewhere)>0) {
        "url": "/",
        "potentialAction": {
          "@type": "SearchAction",
-         "target": "/packages/?q={search_term}",
+         "target": "/?q={search_term}",
          "query-input": "required name=search_term"
        }
     }
