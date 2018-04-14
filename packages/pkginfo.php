@@ -115,17 +115,24 @@
     return $dep["install_target"];
   };
 
-  $dep_it = array_map("dependency_extract_name", array_filter( $dependencies, "dependency_is_runtime"));
+  function truncate_version($name) {
+    return preg_replace("[<=>].*$","",$name);
+  }
+
+  $dep_it = array_filter( $dependencies, "dependency_is_runtime");
+  $dep_it = array_map("dependency_extract_name", $dep_it);
+  $dep_it = array_map("truncate_version", $dep_it);
+  $js_dep = array_map("truncate_version", $json_content["Depends On"]);
   $dep_errors = implode(
     ", ",
     array_diff(
-      array_merge($dep_it,$json_content["Depends On"]),
-      array_intersect($dep_it,$json_content["Depends On"])
+      array_merge($dep_it,$js_dep),
+      array_intersect($dep_it,$js_dep)
     )
   );
 
-//  if ($dep_errors != "")
-//    die_500("Dependencies differ: " . $dep_errors);
+  if ($dep_errors != "")
+    die_500("Dependencies differ: " . $dep_errors);
 
   // query dependent packages
 
