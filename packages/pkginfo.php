@@ -163,7 +163,7 @@
     " AND `repository_stability_relations`.`more_stable`=" . $mysql_content["repo_stability"] .
     " WHERE `install_target_providers`.`package`=" . $mysql_content["id"] .
     " GROUP BY `binary_packages`.`id`,`dependency_types`.`id`" .
-    " ORDER BY FIELD (`dependency_types`.`name`,\"run\",\"make\",\"check\",\"link\"), `install_targets`.`name`"
+    " ORDER BY FIELD (`dependency_types`.`name`,\"run\",\"make\",\"check\",\"link\"), `install_targets`.`name`!=`binary_packages`.`pkgname`, `install_targets`.`name`, `binary_packages`.`pkgname`"
     ))
     die_500("Query failed: " . $mysql->error);
 
