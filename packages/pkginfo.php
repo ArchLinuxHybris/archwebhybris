@@ -137,11 +137,16 @@
   // query dependent packages
 
   if (! $mysql_result = $mysql -> query(
-    "SELECT " .
+    "SELECT DISTINCT " .
     "`dependency_types`.`name` AS `dependency_type`," .
-    "`repositories`.`name` AS `repos`," .
-    "`architectures`.`name` AS `archs`," .
-    "`binary_packages`.`pkgname` AS `pkgnames`" .
+    "`install_targets`.`name` AS `install_target`," .
+    "GROUP_CONCAT(" .
+    "CONCAT(\"\\\"\",`dependencies`.`id`,\"\\\": \",\"{\\n\"," .
+      "\"  \\\"repo\\\": \\\"\",`repositories`.`name`,\"\\\",\\n\"," .
+      "\"  \\\"arch\\\": \\\"\",`architectures`.`name`,\"\\\",\\n\"," .
+      "\"  \\\"pkgname\\\": \\\"\",`binary_packages`.`pkgname`,\"\\\"\\n\"," .
+      "\"}\"" .
+    ")) AS `reqs`" .
     " FROM `install_target_providers`" .
     " JOIN `install_targets` ON `install_targets`.`id`=`install_target_providers`.`install_target`" .
     " JOIN `dependencies` ON `install_target_providers`.`install_target`=`dependencies`.`depending_on`" .
@@ -152,13 +157,15 @@
     " JOIN `repository_stability_relations` ON `repository_stability_relations`.`less_stable`=`repositories`.`stability`" .
     " AND `repository_stability_relations`.`more_stable`=" . $mysql_content["repo_stability"] .
     " WHERE `install_target_providers`.`package`=" . $mysql_content["id"] .
-    " GROUP BY `install_targets`.`id`"
+    " GROUP BY `binary_packages`.`id`"
     ))
     die_500("Query failed: " . $mysql->error);
 
   $dependent = array();
-  while ($row = $mysql_result -> fetch_assoc())
+  while ($row = $mysql_result -> fetch_assoc()) {
+    $row["reqs"] = json_decode($row["reqs"]);
     $dependent[] = $row;
+  }
 
   $content = array_merge($mysql_content,$json_content);
 
