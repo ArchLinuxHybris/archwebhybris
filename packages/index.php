@@ -138,7 +138,7 @@ if (isset($_GET["q"])) {
   $exact_filter = " AND `binary_packages`.`pkgname` = from_base64(\"".base64_encode($_GET["q"])."\")";
   $fuzzy_filter = " AND `binary_packages`.`pkgname` LIKE from_base64(\"".base64_encode("%".$_GET["q"]."%")."\")";
 } else {
-  $exact_filter = "";
+  $exact_filter = " AND 0";
   $fuzzy_filter = "";
 }
 
