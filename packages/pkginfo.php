@@ -176,6 +176,18 @@
     " JOIN `repository_stability_relations` ON `repository_stability_relations`.`less_stable`=`repositories`.`stability`" .
     " AND `repository_stability_relations`.`more_stable`=" . $mysql_content["repo_stability"] .
     " WHERE `install_target_providers`.`package`=" . $mysql_content["id"] .
+    " AND NOT EXISTS (" .
+      "SELECT 1 FROM `binary_packages` AS `subst_bp`" .
+      " JOIN `repositories` AS `subst_r` ON `subst_bp`.`repository`=`subst_r`.`id`" .
+  // the substitue must be truly less stable than we
+      " JOIN `repository_stability_relations` AS `subst_rsr` ON `subst_rsr`.`less_stable`=`subst_r`.`stability`" .
+      " AND `subst_rsr`.`less_stable`!=`subst_rsr`.`more_stable`" .
+  // and more (or equally) stable than the required-by
+      " JOIN `repository_stability_relations` AS `subst_rsr2` ON `subst_rsr2`.`more_stable`=`subst_r`.`stability`" .
+      " WHERE `subst_bp`.`pkgname`=from_base64(\"" . base64_encode($mysql_content["pkgname"]) . "\")" .
+      " AND `subst_rsr2`.`less_stable`=`repositories`.`stability`" .
+      " AND `subst_rsr`.`more_stable`=" . $mysql_content["repo_stability"] .
+    ")" .
     " GROUP BY `binary_packages`.`id`,`dependency_types`.`id`" .
     " ORDER BY FIELD (`dependency_types`.`name`,\"run\",\"make\",\"check\",\"link\"), `install_targets`.`name`!=`binary_packages`.`pkgname`, `install_targets`.`name`, `binary_packages`.`pkgname`"
     ))
