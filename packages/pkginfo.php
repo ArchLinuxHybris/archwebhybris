@@ -106,6 +106,16 @@
       " AND `repository_stability_relations`.`less_stable`=" . $mysql_content["repo_stability"] .
     ") ON `install_target_providers`.`install_target`=`dependencies`.`depending_on`" .
     " WHERE `dependencies`.`dependent`=" . $mysql_content["id"] .
+    " AND NOT EXISTS (" .
+      "SELECT 1 FROM `binary_packages` AS `subst_bp`" .
+      " JOIN `repositories` AS `subst_r` ON `subst_bp`.`repository`=`subst_r`.`id`" .
+      " JOIN `repository_stability_relations` AS `subst_rsr` ON `subst_rsr`.`less_stable`=`subst_r`.`stability`" .
+      " AND `subst_rsr`.`less_stable`!=`subst_rsr`.`more_stable`" .
+      " JOIN `repository_stability_relations` AS `subst_rsr2` ON `subst_rsr2`.`more_stable`=`subst_r`.`stability`" .
+      " WHERE `subst_bp`.`pkgname`=`binary_packages`.`pkgname`" .
+      " AND `subst_rsr`.`more_stable`=`repositories`.`stability`" .
+      " AND `subst_rsr2`.`less_stable`=`repositories`.`stability`" .
+    ")" .
     " GROUP BY `install_targets`.`id`,`dependency_types`.`id`" .
     " ORDER BY FIELD (`dependency_types`.`name`,\"run\",\"make\",\"check\",\"link\"), `install_targets`.`name`"
     ))
