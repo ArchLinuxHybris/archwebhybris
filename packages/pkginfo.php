@@ -393,7 +393,8 @@ if (count($elsewhere)>0) {
     if (count($dep["deps"]) == 0) {
       print "<font color=\"#ff0000\">not satisfiable dependency: \"" . $dep["install_target"] . "\"</font>\n";
     } else {
-      if (count($dep["deps"]) > 1) {
+      if ((count($dep["deps"]) > 1) ||
+        (array_values($dep["deps"])[0]["pkgname"] != $dep["install_target"])) {
         print $dep["install_target"];
         print " <span class=\"virtual-dep\">(";
       };
