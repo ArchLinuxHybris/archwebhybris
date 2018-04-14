@@ -393,8 +393,11 @@ if (count($elsewhere)>0) {
     if (count($dep["deps"]) == 0) {
       print "<font color=\"#ff0000\">not satisfiable dependency: \"" . $dep["install_target"] . "\"</font>\n";
     } else {
-      if ((count($dep["deps"]) > 1) ||
-        (array_values($dep["deps"])[0]["pkgname"] != $dep["install_target"])) {
+      $virtual_dep = (
+        (count($dep["deps"]) > 1) ||
+        (array_values($dep["deps"])[0]["pkgname"] != $dep["install_target"])
+      );
+      if ($virtual_dep) {
         print $dep["install_target"];
         print " <span class=\"virtual-dep\">(";
       };
@@ -406,7 +409,7 @@ if (count($elsewhere)>0) {
         print "<a href=\"/".$d_p["repo"]."/".$d_p["arch"]."/".$d_p["pkgname"]."/\" ";
         print "title=\"View package details for ".$d_p["pkgname"]."\">".$d_p["pkgname"]."</a>";
       }
-      if (count($dep["deps"])>1)
+      if ($virtual_dep)
         print ")</span>";
       print "\n";
     };
