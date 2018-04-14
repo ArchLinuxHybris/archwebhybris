@@ -77,7 +77,7 @@
     "SELECT DISTINCT " .
     "`dependency_types`.`name` AS `dependency_type`," .
     "GROUP_CONCAT(" .
-    "CONCAT(\"[\",`install_target_providers`.`id`,\"]: \",\"{\\n\"," .
+    "CONCAT(\"\\\"\",`install_target_providers`.`id`,\"\\\": \",\"{\\n\"," .
       "\"  \\\"repo\\\": \\\"\",`repositories`.`name`,\"\\\",\\n\"," .
       "\"  \\\"arch\\\": \\\"\",`architectures`.`name`,\"\\\",\\n\"," .
       "\"  \\\"pkgname\\\": \\\"\",`binary_packages`.`pkgname`,\"\\\"\\n\"," .
@@ -102,8 +102,10 @@
     die_500("Query failed: " . $mysql->error);
 
   $dependencies = array();
-  while ($row = $mysql_result -> fetch_assoc())
+  while ($row = $mysql_result -> fetch_assoc()) {
+    $row["deps"] = json_decode("{".$row["deps"]."}",true);
     $dependencies[] = $row;
+  }
 
   function dependency_is_runtime($dep) {
     return $dep["dependency_type"]=="run";
