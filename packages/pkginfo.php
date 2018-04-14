@@ -292,8 +292,8 @@
                     onclick="return !window.open('/packages/flaghelp/','FlagHelp',
                     'height=350,width=450,location=no,scrollbars=yes,menubars=no,toolbars=no,resizable=no');">(?)</a></li>
                 
-                <li><a href="download/" rel="nofollow" title="Download 0ad from mirror">Download From Mirror</a></li>
 -->
+                <li><a href="http://pool.mirror.archlinux32.org/i686/<?php print $content["repo"]."/".$content["pkgname"]."-".$content["Version"]."-".$content["arch"]; ?>.pkg.tar.xz" rel="nofollow" title="Download <?php print $content["Name"]; ?> from mirror">Download From Mirror</a></li>
             </ul>
 
             
