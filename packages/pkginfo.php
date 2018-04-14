@@ -286,7 +286,7 @@
 <?php
   print "<a href=\"https://bugs.archlinux32.org/index.php?string=";
   print $content["Name"];
-  print " title=\"View existing bug tickets for ";
+  print "\" title=\"View existing bug tickets for ";
   print $content["Name"];
   print "\">Bug Reports</a> / ";
   print "<a href=\"https://bugs.archlinux32.org/index.php?do=newtask&project=1&product_category=";
