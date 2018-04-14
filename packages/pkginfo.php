@@ -40,6 +40,7 @@
       "`binary_packages`.`sub_pkgrel`" .
     ") AS `version`," .
     "`repositories`.`stability` AS `repo_stability`," .
+    "`repository_stabilities`.`name` AS `repo_stability_name`," .
     "`repositories`.`name` AS `repo`," .
     "`architectures`.`name` AS `arch`," .
     "`git_repositories`.`name` AS `git_repo`," .
@@ -48,6 +49,7 @@
     " FROM `binary_packages`" .
     " JOIN `architectures` ON `binary_packages`.`architecture`=`architectures`.`id`" .
     " JOIN `repositories` ON `binary_packages`.`repository`=`repositories`.`id`" .
+    " JOIN `repository_stabilities` ON `repositories`.`stability`=`repository_stabilities`.`id`" .
     " JOIN `build_assignments` ON `binary_packages`.`build_assignment`=`build_assignments`.`id`" .
     " JOIN `package_sources` ON `build_assignments`.`package_source`=`package_sources`.`id`" .
     " JOIN `upstream_repositories` ON `package_sources`.`upstream_package_repository`=`upstream_repositories`.`id`" .
@@ -280,12 +282,30 @@
   }
 ?>
                 </li>
-<!-- TODO
                 <li>
-                    <a href="https://bugs.archlinux.org/?project=5&string=0ad" title="View existing bug tickets for 0ad">Bug Reports</a> /
-                    <a href="https://bugs.archlinux.org/newtask?project=5&product_category=33&item_summary=%5B0ad%5D+PLEASE+ENTER+SUMMARY" title="Report new bug for 0ad">Add New Bug</a>
+<?php
+  print "<a href=\"https://bugs.archlinux32.org/index.php?string=";
+  print $content["Name"];
+  print " title=\"View existing bug tickets for ";
+  print $content["Name"];
+  print "\">Bug Reports</a> / ";
+  print "<a href=\"https://bugs.archlinux32.org/index.php?do=newtask&project=1&product_category=";
+  if ($content["repo_stability_name"]=="stable")
+    print "8"; // stable
+  elseif ($content["repo_stability_name"]=="testing")
+    print "6"; // testing
+  elseif ($content["repo_stability_name"]=="unbuilt")
+    print "7"; // build-list
+  else
+    print "1"; // packages
+  print "&item_summary=%5B";
+  print $content["Name"];
+  print "%5D+PLEASE+ENTER+SUMMARY\" title=\"Report new bug for ";
+  print $content["Name"];
+  print "\">Add New Bug</a>";
+?>
                 </li>
-                
+<!-- TODO
                 <li><a href="flag/" title="Flag 0ad as out-of-date">Flag Package Out-of-Date</a>
                 <a href="/packages/flaghelp/"
                     title="Get help on package flagging"
