@@ -393,7 +393,7 @@ wxgtk <span class="virtual-dep">(<a href="/packages/extra/x86_64/wxgtk2/" title=
             
         </div>
         
-        <div id="pkgfiles" class="listing">
+<!--        <div id="pkgfiles" class="listing">
             <h3 title="Complete list of files contained within this package">
                 Package Contents</h3>
             <div id="pkgfilelist">
@@ -402,7 +402,7 @@ wxgtk <span class="virtual-dep">(<a href="/packages/extra/x86_64/wxgtk2/" title=
                     View the file list for 0ad</a></p>
             </div>
         </div>
-    </div>
+    </div> -->
 </div>
 
 
