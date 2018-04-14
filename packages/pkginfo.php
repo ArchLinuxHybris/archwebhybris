@@ -114,7 +114,7 @@
       " JOIN `repository_stability_relations` AS `subst_rsr2` ON `subst_rsr2`.`more_stable`=`subst_r`.`stability`" .
       " WHERE `subst_bp`.`pkgname`=`binary_packages`.`pkgname`" .
       " AND `subst_rsr`.`more_stable`=`repositories`.`stability`" .
-      " AND `subst_rsr2`.`less_stable`=`repositories`.`stability`" .
+      " AND `subst_rsr2`.`less_stable`=" . $mysql_content["repo_stability"] .
     ")" .
     " GROUP BY `install_targets`.`id`,`dependency_types`.`id`" .
     " ORDER BY FIELD (`dependency_types`.`name`,\"run\",\"make\",\"check\",\"link\"), `install_targets`.`name`"
