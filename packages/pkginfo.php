@@ -118,14 +118,10 @@
     return $dep["install_target"];
   };
 
-  function truncate_version($name) {
-    return preg_replace("[<=>].*$","",$name);
-  }
-
   $dep_it = array_filter( $dependencies, "dependency_is_runtime");
   $dep_it = array_map("dependency_extract_name", $dep_it);
-  $dep_it = array_map("truncate_version", $dep_it);
-  $js_dep = array_map("truncate_version", $json_content["Depends On"]);
+  $dep_it = preg_replace("/[<=>].*$/","",$dep_it);
+  $js_dep = preg_replace("/[<=>].*$/","",$json_content["Depends On"]);
   $dep_errors = implode(
     ", ",
     array_diff(
@@ -135,7 +131,11 @@
   );
 
   if ($dep_errors != "")
-    die_500("Dependencies differ: " . $dep_errors);
+    die_500(
+      "Dependencies differ: " . $dep_errors. "<br>\n" .
+      "mysql: " . implode(", ",$dep_it) . "<br>\n" .
+      "json: " . implode(", ",$js_dep)
+    );
 
   // query dependent packages
 
