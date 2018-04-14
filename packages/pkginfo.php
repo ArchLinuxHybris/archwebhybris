@@ -141,13 +141,9 @@
     "SELECT DISTINCT " .
     "`dependency_types`.`name` AS `dependency_type`," .
     "`install_targets`.`name` AS `install_target`," .
-    "GROUP_CONCAT(" .
-    "CONCAT(\"\\\"\",`dependencies`.`id`,\"\\\": \",\"{\\n\"," .
-      "\"  \\\"repo\\\": \\\"\",`repositories`.`name`,\"\\\",\\n\"," .
-      "\"  \\\"arch\\\": \\\"\",`architectures`.`name`,\"\\\",\\n\"," .
-      "\"  \\\"pkgname\\\": \\\"\",`binary_packages`.`pkgname`,\"\\\"\\n\"," .
-      "\"}\"" .
-    ")) AS `reqs`" .
+    "`repositories`.`name` AS `repo`," .
+    "`architectures`.`name` AS `arch`," .
+    "`binary_packages`.`pkgname`" .
     " FROM `install_target_providers`" .
     " JOIN `install_targets` ON `install_targets`.`id`=`install_target_providers`.`install_target`" .
     " JOIN `dependencies` ON `install_target_providers`.`install_target`=`dependencies`.`depending_on`" .
@@ -164,12 +160,12 @@
     die_500("Query failed: " . $mysql->error);
 
   $dependent = array();
-  while ($row = $mysql_result -> fetch_assoc()) {
-    $row["reqs"] = json_decode($row["reqs"]);
+  while ($row = $mysql_result -> fetch_assoc())
     $dependent[] = $row;
-  }
 
   $content = array_merge($mysql_content,$json_content);
+
+  // query substitutes
 
   if (! $mysql_result = $mysql -> query(
     "SELECT " .
@@ -289,9 +285,6 @@ if (count($elsewhere)>0) {
     <meta itemprop="dateCreated" content="<?php print $content["Build Date"]; ?>"/>
     <meta itemprop="datePublished" content="<?php print $content["Build Date"]; ?>"/>
     <meta itemprop="operatingSystem" content="Arch Linux 32"/>
-<!-- TODO    <div style="display:none" itemprop="provider" itemscope itemtype="http://schema.org/Person">
-        <meta itemprop="name" content="Levente Polyak"/>
-    </div> -->
     <table id="pkginfo">
         <tr>
             <th>Architecture:</th>
@@ -380,32 +373,15 @@ if (count($elsewhere)>0) {
 <?php
   foreach ($dependent as $dep) {
     print "<li>\n";
-    if (count($dep["deps"]) > 1) {
-      print $dep["install_target"];
-      print " <span class=\"virtual-dep\">(";
-    };
-    $first = true;
-    foreach ($dep["deps"] as $d_p) {
-      if (!$first)
-        print ",\n";
-      $first = false;
-      print "<a href=\"/".$d_p["repo"]."/".$d_p["arch"]."/".$d_p["pkgname"]."/\" ";
-      print "title=\"View package details for ".$d_p["pkgname"]."\">".$d_p["pkgname"]."</a>";
-    }
-    if (count($dep["deps"])>1)
-      print ")</span>";
+    if ($dep["install_target"] != $content["Name"])
+      print $dep["install_target"] . " (";
+    print "<a href=\"/".$dep["repo"]."/".$dep["arch"]."/".$dep["pkgname"]."/\" ";
+    print "title=\"View package details for ".$dep["pkgname"]."\">".$dep["pkgname"]."</a>";
+    if ($dep["install_target"] != $content["Name"])
+      print ")";
     print "\n";
-  };
-  if ($dep["dependency_type"]!="run")
-    print "<span class=\"" . $dep["dependency_type"] . "-dep\"> (" . $dep["dependency_type"] . ")</span>\n";
-  print "</li>\n";
-
-  foreach ($dependent as $d) {
-    print "<li><a href=\"/" . $d["repo"] . "/" . $d["arch"] . "/" . $d["pkgname"] . "/\"";
-    print " title=\"View package details for " . $d["pkgname"] . "\">" . $d["pkgname"] . "</a>\n";
-    if ($d["dependency_type"]=="make")
-      print "<span class=\"make-dep\"> (make)</span>\n";
-print " " . $d["install_target"];
+    if ($dep["dependency_type"] != "run")
+      print "<span class=\"" . $dep["dependency_type"] . "-dep\"> (" . $dep["dependency_type"] . ")</span>\n";
     print "</li>\n";
   }
 ?>
