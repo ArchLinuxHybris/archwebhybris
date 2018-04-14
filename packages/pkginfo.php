@@ -98,7 +98,7 @@
     ") ON `install_target_providers`.`install_target`=`dependencies`.`depending_on`" .
     " WHERE `dependencies`.`dependent`=" . $mysql_content["id"] .
     " GROUP BY `install_targets`.`id`" .
-    " ORDER BY FIELD (`dependency_types`.`name`,\"run\",\"make\",\"check\",\"link\")"
+    " ORDER BY FIELD (`dependency_types`.`name`,\"run\",\"make\",\"check\",\"link\"), `install_targets`.`name`"
     ))
     die_500("Query failed: " . $mysql->error);
 
@@ -159,7 +159,7 @@
     " AND `repository_stability_relations`.`more_stable`=" . $mysql_content["repo_stability"] .
     " WHERE `install_target_providers`.`package`=" . $mysql_content["id"] .
     " GROUP BY `binary_packages`.`id`" .
-    " ORDER BY FIELD (`dependency_types`.`name`,\"run\",\"make\",\"check\",\"link\")"
+    " ORDER BY FIELD (`dependency_types`.`name`,\"run\",\"make\",\"check\",\"link\"), `install_targets`.`name`"
     ))
     die_500("Query failed: " . $mysql->error);
 
