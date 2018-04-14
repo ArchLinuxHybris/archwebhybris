@@ -60,13 +60,15 @@
 
   $same_keys = array (
     array("mysql" => "pkgname", "json" => "Name"),
-    array("mysql" => "version", "json" => "Version"),
+    array("mysql" => "version", "json" => "Version", "suffix_diff" => ".0"),
     array("mysql" => "repo", "json" => "Repository"),
     array("mysql" => "arch", "json" => "Architecture")
   );
 
   foreach ($same_keys as $same_key)
-    if ($mysql_content[$same_key["mysql"]] != $json_content[$same_key["json"]])
+    if (($mysql_content[$same_key["mysql"]] != $json_content[$same_key["json"]]) &&
+      ((!isset($same_key["suffix_diff"])) ||
+        ($mysql_content[$same_key["mysql"]] != $json_content[$same_key["json"]].$same_key["suffix_diff"])))
       die_500("Inconsistency in Database found:<br>\n" .
         "buildmaster[" . $same_key["mysql"] . "] != repositories[" . $same_key["json"] . "]:<br>\n" .
         "\"" . $mysql_content[$same_key["mysql"]] . "\" != \"" . $json_content[$same_key["json"]] . "\"");
