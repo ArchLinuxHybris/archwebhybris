@@ -169,6 +169,31 @@
 
   $content = array_merge($mysql_content,$json_content);
 
+  if (! $mysql_result = $mysql -> query(
+    "SELECT " .
+    "`binary_packages`.`pkgname` AS `pkgname`," .
+    "`repositories`.`name` AS `repo`," .
+    "`architectures`.`name` AS `arch`," .
+    "CONCAT(" .
+      "IF(`binary_packages`.`epoch`=\"0\",\"\",CONCAT(`binary_packages`.`epoch`,\":\"))," .
+      "`binary_packages`.`pkgver`,\"-\"," .
+      "`binary_packages`.`pkgrel`,\".\"," .
+      "`binary_packages`.`sub_pkgrel`" .
+    ") AS `version`" .
+    " FROM `binary_packages` " .
+    " JOIN `architectures` ON `binary_packages`.`architecture`=`architectures`.`id`" .
+    " JOIN `repositories` ON `binary_packages`.`repository`=`repositories`.`id`" .
+    " JOIN `binary_packages` AS `original`" .
+    " ON `binary_packages`.`pkgname`=`original`.`pkgname`" .
+    " AND `binary_packages`.`id`!=`original`.`id`" .
+    " WHERE `original`.`id`=" . $mysql_content["id"]
+    ))
+    die_500("Query failed: " . $mysql->error);
+
+  $elsewhere = array();
+  while ($row = $mysql_result -> fetch_assoc())
+    $elsewhere[] = $row;
+
 ?>
 <!DOCTYPE html>
 
@@ -236,7 +261,22 @@
             
         </div>
 
-        
+<?php
+
+if (count($elsewhere)>0) {
+  print "<div id=\"elsewhere\" class=\"widget\">\n";
+  print "<h4>Versions Elsewhere</h4>\n";
+  foreach ($elsewhere as $subst) {
+    print "<ul>\n";
+    print "<li><a href=\"/" . $subst["repo"] . "/" . $subst["arch"] . "/" . $subst["pkgname"] ."/\"";
+    print " title=\"Package details for " . $subst["pkgname"] ."\">";
+    print $subst["pkgname"] . "-" . $subst["version"] . " [" . $subst["repo"] . "] (" . $subst["arch"] . ")</a></li>\n";
+    print "</ul>\n";
+  }
+  print "</div>\n";
+}
+
+?>
     </div>
 
     <div itemscope itemtype="http://schema.org/SoftwareApplication">
