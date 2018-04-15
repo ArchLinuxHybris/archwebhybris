@@ -56,7 +56,7 @@ $width = 1600;
 $height = 600;
 $border = 5;
 $legend_line_length = 10;
-$legend_height = 4 * ImageFontHeight(5) + $legend_line_length;
+$legend_height = 2 * ImageFontHeight(5) + $legend_line_length;
 
 $im = @ImageCreate ($width + $legend_line_length + $max_len * ImageFontWidth(5), $height + $legend_height)
       or die ("Cannot create new gd-image-stream");
@@ -122,8 +122,6 @@ function print_graph($data, $color) {
 };
 
 ImageRectangle($im, $legend_line_length, 0, $width-1+$legend_line_length, $height-1, $foreground_color);
-
-ImageString($im, 5, $legend_line_length, $height + 2*$legend_line_length + 2*ImageFontHeight(5), "( ".trim(shell_exec("uptime | sed 's|^.*\\s\\(load\\)|\\1|'"))." )", $foreground_color);
 
 $xpos = $legend_line_length;
 foreach ($print_columns as $column) {
