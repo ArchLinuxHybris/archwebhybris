@@ -205,6 +205,7 @@
     "SELECT " .
     "`binary_packages`.`pkgname` AS `pkgname`," .
     "`repositories`.`name` AS `repo`," .
+    "`repositories`.`is_on_master_mirror`," .
     "`architectures`.`name` AS `arch`," .
     "CONCAT(" .
       "IF(`binary_packages`.`epoch`=\"0\",\"\",CONCAT(`binary_packages`.`epoch`,\":\"))," .
@@ -342,9 +343,15 @@ if (count($elsewhere)>0) {
   print "<h4>Versions Elsewhere</h4>\n";
   foreach ($elsewhere as $subst) {
     print "<ul>\n";
-    print "<li><a href=\"/" . $subst["repo"] . "/" . $subst["arch"] . "/" . $subst["pkgname"] ."/\"";
-    print " title=\"Package details for " . $subst["pkgname"] ."\">";
-    print $subst["pkgname"] . "-" . $subst["version"] . " [" . $subst["repo"] . "] (" . $subst["arch"] . ")</a></li>\n";
+    print "<li>";
+    if ($subst["is_on_master_mirror"]) {
+      print "<a href=\"/" . $subst["repo"] . "/" . $subst["arch"] . "/" . $subst["pkgname"] ."/\"";
+      print " title=\"Package details for " . $subst["pkgname"] ."\">";
+    }
+    print $subst["pkgname"] . "-" . $subst["version"] . " [" . $subst["repo"] . "] (" . $subst["arch"] . ")";
+    if ($subst["is_on_master_mirror"])
+      print "</a>";
+    print "</li>\n";
     print "</ul>\n";
   }
   print "</div>\n";
