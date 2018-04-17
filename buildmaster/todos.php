@@ -1,11 +1,8 @@
 <?php
 
-$mysql = new mysqli("localhost", "webserver", "empty", "buildmaster");
-if ($mysql->connect_error) {
-  die("Connection failed: " . $mysql->connect_error);
-}
+include "lib/mysql.php";
 
-$result = $mysql -> query(
+$result = mysql_run_query(
   "SELECT DISTINCT " .
   "`todos`.`id`," .
   "`todos`.`file`," .
@@ -28,7 +25,7 @@ if (isset($_GET["graph"])) {
 
   }
 
-  $result = $mysql -> query(
+  $result = mysql_run_query(
     "SELECT DISTINCT " .
     "`todo_links`.`dependent`," .
     "`todo_links`.`depending_on` " .

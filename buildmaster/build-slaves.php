@@ -1,28 +1,30 @@
-<html><head><title>list of build slaves</title></head><body>
 <?php
 
-  $conn = new mysqli("localhost","webserver","empty","buildmaster");
-  if ($conn->connect_error) {
-    die("Connection to mysql database failed: " . $conn->connect_error);
-  }
+  include "lib/mysql.php";
 
-  if (!$result =
-    $conn->query(
-      "SELECT" .
-      " `build_slaves`.`name`," .
-      "`build_slaves`.`operator`," .
-      "`package_sources`.`pkgbase`," .
-      "`build_slaves`.`last_connection`," .
-      "`build_slaves`.`logged_lines`," .
-      "`build_slaves`.`last_action`" .
-      " FROM `build_slaves`" .
-      " LEFT JOIN `build_assignments` ON" .
-      " `build_slaves`.`currently_building`=`build_assignments`.`id`" .
-      " LEFT JOIN `package_sources` ON" .
-      " `build_assignments`.`package_source`=`package_sources`.`id`" .
-      " ORDER BY `build_slaves`.`last_connection`"
-    ))
-    die($conn->error);
+  $result = mysql_run_query(
+    "SELECT" .
+    " `build_slaves`.`name`," .
+    "`build_slaves`.`operator`," .
+    "`package_sources`.`pkgbase`," .
+    "`build_slaves`.`last_connection`," .
+    "`build_slaves`.`logged_lines`," .
+    "`build_slaves`.`last_action`" .
+    " FROM `build_slaves`" .
+    " LEFT JOIN `build_assignments` ON" .
+    " `build_slaves`.`currently_building`=`build_assignments`.`id`" .
+    " LEFT JOIN `package_sources` ON" .
+    " `build_assignments`.`package_source`=`package_sources`.`id`" .
+    " ORDER BY `build_slaves`.`last_connection`"
+  );
+
+?>
+<html>
+  <head>
+    <title>list of build slaves</title>
+  </head>
+  <body>
+<?php
 
   print "<table border=1>\n";
   if ($result->num_rows > 0) {

@@ -1,9 +1,6 @@
 <?php
 
-$mysql = new mysqli("localhost", "webserver", "empty", "buildmaster");
-if ($mysql->connect_error) {
-  die("Connection failed: " . $mysql->connect_error);
-}
+include "lib/mysql.php";
 
 $match = "";
 
@@ -28,15 +25,15 @@ $colors["virtual"]="#800080";
 
 $limit=200;
 
-if (! $result = $mysql -> query(
+mysql_run_query(
   "CREATE TEMPORARY TABLE `cons` (" .
     "`dep` BIGINT, " .
     "`itp` BIGINT, " .
     "UNIQUE KEY `content` (`dep`,`itp`)" .
-  ")"))
-  die($mysql->error);
+  ")"
+);
 
-if (! $result = $mysql -> query(
+mysql_run_query(
   "INSERT IGNORE INTO `cons` (`dep`,`itp`)" .
   " SELECT `dependencies`.`id`,`install_target_providers`.`id`".
   " FROM `binary_packages`" .
@@ -53,10 +50,9 @@ if (! $result = $mysql -> query(
   " JOIN `install_target_providers` ON `install_target_providers`.`install_target`=`dependencies`.`depending_on`" .
   " WHERE (`dependency_types`.`relevant_for_binary_packages` OR `repository_stabilities`.`name`=\"unbuilt\")" .
   " LIMIT " . $limit
-  ))
-  die($mysql->error);
+);
 
-if (! $result = $mysql -> query(
+mysql_run_query(
   "INSERT IGNORE INTO `cons` (`dep`,`itp`)" .
   " SELECT `dependencies`.`id`,`install_target_providers`.`id`".
   " FROM `binary_packages`" .
@@ -73,46 +69,39 @@ if (! $result = $mysql -> query(
   " JOIN `dependency_types` ON `dependencies`.`dependency_type`=`dependency_types`.`id`" .
   " WHERE (`dependency_types`.`relevant_for_binary_packages` OR `d_rs`.`name`=\"unbuilt\")" .
   " LIMIT " . $limit
-  ))
-  die($mysql->error);
+);
 
 unset($knots);
 unset($edges);
 
-if (! $result = $mysql -> query(
+$result = mysql_run_query(
   "SELECT DISTINCT `install_target_providers`.`install_target`,`install_target_providers`.`package`" .
   " FROM `cons`" .
   " JOIN `install_target_providers` ON `cons`.`itp`=`install_target_providers`.`id`"
-  ))
-  die($mysql->error);
+);
 
-if ($result -> num_rows > 0)
-  while ($row = $result->fetch_assoc())
-    $edges .= "\"p" . $row["package"] . "\" -> \"i" . $row["install_target"] . "\" [color = \"#000080\"];\n";
+while ($row = $result->fetch_assoc())
+  $edges .= "\"p" . $row["package"] . "\" -> \"i" . $row["install_target"] . "\" [color = \"#000080\"];\n";
 
-if (! $result = $mysql -> query(
+$result = mysql_run_query(
   "SELECT DISTINCT `dependencies`.`dependent`,`dependencies`.`depending_on`,`dependency_types`.`name`" .
   " FROM `cons`" .
   " JOIN `dependencies` ON `cons`.`dep`=`dependencies`.`id`" .
   " JOIN `dependency_types` ON `dependencies`.`dependency_type`=`dependency_types`.`id`"
-  ))
-  die($mysql->error);
+);
 
-if ($result -> num_rows > 0)
-  while ($row = $result->fetch_assoc())
-    $edges .= "\"i" . $row["depending_on"] . "\" -> \"p" . $row["dependent"] . "\" [taillabel = \"" . $row["name"] . "\"];\n";
+while ($row = $result->fetch_assoc())
+  $edges .= "\"i" . $row["depending_on"] . "\" -> \"p" . $row["dependent"] . "\" [taillabel = \"" . $row["name"] . "\"];\n";
 
-if (! $result = $mysql -> query(
+$result = mysql_run_query(
   "SELECT DISTINCT `install_targets`.`id`,`install_targets`.`name`" .
   " FROM `cons`" .
   " JOIN `dependencies` ON `cons`.`dep`=`dependencies`.`id`" .
   " JOIN `install_targets` ON `dependencies`.`depending_on`=`install_targets`.`id`"
-  ))
-  die($mysql->error);
+);
 
-if ($result -> num_rows > 0)
-  while ($row = $result->fetch_assoc())
-    $knots .= "\"i" . $row["id"] . "\" [label = \"" . $row["name"] . "\", fontcolor = \"#000080\"];\n";
+while ($row = $result->fetch_assoc())
+  $knots .= "\"i" . $row["id"] . "\" [label = \"" . $row["name"] . "\", fontcolor = \"#000080\"];\n";
 
 $pkgfile_query =
   "CONCAT(".
@@ -125,7 +114,7 @@ $pkgfile_query =
     "`architectures`.`name`" .
   ") AS `filename`";
 
-if (! $result = $mysql -> query(
+$result = mysql_run_query(
   "SELECT DISTINCT " .
   "`binary_packages`.`id`," .
   "`repository_stabilities`.`name` AS `stability`," .
@@ -136,14 +125,12 @@ if (! $result = $mysql -> query(
   " JOIN `architectures` ON `architectures`.`id`=`binary_packages`.`architecture`" .
   " JOIN `repositories` ON `repositories`.`id`=`binary_packages`.`repository`" .
   " JOIN `repository_stabilities` ON `repository_stabilities`.`id`=`repositories`.`stability`"
-  ))
-  die($mysql->error);
+);
 
-if ($result -> num_rows > 0)
-  while ($row = $result->fetch_assoc())
-    $knots .= "\"p" . $row["id"] . "\" [label = \"" . $row["filename"] . "\", fontcolor = \"" . $colors[$row["stability"]] . "\"];\n";
+while ($row = $result->fetch_assoc())
+  $knots .= "\"p" . $row["id"] . "\" [label = \"" . $row["filename"] . "\", fontcolor = \"" . $colors[$row["stability"]] . "\"];\n";
 
-if (! $result = $mysql -> query(
+$result = mysql_run_query(
   "SELECT DISTINCT " .
   "`binary_packages`.`id`," .
   "`repository_stabilities`.`name` AS `stability`," .
@@ -154,12 +141,10 @@ if (! $result = $mysql -> query(
   " JOIN `architectures` ON `architectures`.`id`=`binary_packages`.`architecture`" .
   " JOIN `repositories` ON `repositories`.`id`=`binary_packages`.`repository`" .
   " JOIN `repository_stabilities` ON `repository_stabilities`.`id`=`repositories`.`stability`"
-  ))
-  die($mysql->error);
+);
 
-if ($result -> num_rows > 0)
-  while ($row = $result->fetch_assoc())
-    $knots .= "\"p" . $row["id"] . "\" [label = \"" . $row["filename"] . "\", fontcolor = \"" . $colors[$row["stability"]] . "\"];\n";
+while ($row = $result->fetch_assoc())
+  $knots .= "\"p" . $row["id"] . "\" [label = \"" . $row["filename"] . "\", fontcolor = \"" . $colors[$row["stability"]] . "\"];\n";
 
 $knots = str_replace("\$","\\\$",$knots);
 $edges = str_replace("\$","\\\$",$edges);
@@ -175,5 +160,3 @@ passthru(
   "}\n" .
   "EOF\n"
 );
-
-?>

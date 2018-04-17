@@ -1,23 +1,13 @@
-<html>
-<head>
-<title>More and less critical issues with the database</title>
-<link rel="stylesheet" type="text/css" href="/static/style.css">
-</head>
-<body>
-<a href="https://buildmaster.archlinux32.org/">Start page</a><br>
 <?php
+
+  include "lib/mysql.php";
 
   if (isset($_GET["ignore-haskell"]))
     $ignore = " AND `install_targets`.`name` NOT LIKE \"libHS%\"";
   else
     $ignore = "";
 
-  $mysql = new mysqli("localhost", "webserver", "empty", "buildmaster");
-  if ($mysql->connect_error) {
-    die("Connection failed: " . $mysql->connect_error);
-  }
-
-  if (! $result = $mysql -> query(
+  $result = mysql_run_query(
     "SELECT CONCAT(" .
     "`repositories`.`name`,\"/\"," .
     "`binary_packages`.`pkgname`,\"-\"," .
@@ -56,30 +46,13 @@
     ")" .
     $ignore .
     " ORDER BY `is_to_be_deleted`, `binary_packages`.`pkgname`"
-  ))
-    die($mysql -> error);
+  );
 
-  print "Found " . ($result -> num_rows) . " serious issues.<br>\n";
+  $serious_issues = array();
+  while ( $row = $result -> fetch_assoc() )
+    $serious_issues[] = $row;
 
-  if ($result -> num_rows > 0) {
-
-    while ($row = $result->fetch_assoc()) {
-      if ($row["is_to_be_deleted"]==1)
-        print "<font color=\"#00ff00\">(marked as to-be-deleted) ";
-      else
-        print "<font color=\"#ff0000\">";
-      print $row["pkgfile"] . " depends on " . $row["install_target"] . " which is not provided by any package";
-      if (isset($row["subst_repository"]))
-        print " - but can be replaced by the one in " . $row["subst_repository"];
-      elseif (isset($row["subst_buildlist"]))
-        print " - but is already rescheduled";
-      print ".<br>";
-      print "</font>\n";
-    }
-
-  }
-
-  if (! $result = $mysql -> query(
+  $result = mysql_run_query(
     "SELECT CONCAT(" .
     "`repositories`.`name`,\"/\"," .
     "`binary_packages`.`pkgname`,\"-\"," .
@@ -114,21 +87,47 @@
     ")" .
     $ignore .
     " ORDER BY `is_to_be_deleted`, `binary_packages`.`pkgname`"
-  ))
-    die($mysql -> error);
+  );
 
-  print "Found " . ($result -> num_rows) . " stability issues.<br>\n";
+  $stability_issues = array();
+  while ( $row = $result -> fetch_assoc() )
+    $stability_issues[] = $row;
 
-  if ($result -> num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-      if ($row["is_to_be_deleted"]==1)
-        print "<font color=\"#00ff00\">(marked as to-be-deleted) ";
-      else
-        print "<font color=\"#800000\">";
-      print $row["pkgfile"] . " depends on " . $row["install_target"] . " which is not provided by any package installable from enabled " . $row["stability"] . " repositories.<br>";
-      print "</font>\n";
-    }
+?>
+<html>
+<head>
+<title>More and less critical issues with the database</title>
+<link rel="stylesheet" type="text/css" href="/static/style.css">
+</head>
+<body>
+<a href="https://buildmaster.archlinux32.org/">Start page</a><br>
+<?php
 
+  print "Found " . count( $serious_issues ) . " serious issues.<br>\n";
+
+  foreach ( $serious_issues as $row ) {
+    if ($row["is_to_be_deleted"]==1)
+      print "<font color=\"#00ff00\">(marked as to-be-deleted) ";
+    else
+      print "<font color=\"#ff0000\">";
+    print $row["pkgfile"] . " depends on " . $row["install_target"] . " which is not provided by any package";
+    if (isset($row["subst_repository"]))
+      print " - but can be replaced by the one in " . $row["subst_repository"];
+    elseif (isset($row["subst_buildlist"]))
+      print " - but is already rescheduled";
+    print ".<br>";
+    print "</font>\n";
+  }
+
+  print "Found " . count( $stability_issues ) . " stability issues.<br>\n";
+
+  foreach ( $stability_issues as $row ) {
+    if ($row["is_to_be_deleted"]==1)
+      print "<font color=\"#00ff00\">(marked as to-be-deleted) ";
+    else
+      print "<font color=\"#800000\">";
+    print $row["pkgfile"] . " depends on " . $row["install_target"] . " which is not provided by any package installable from enabled " . $row["stability"] . " repositories.<br>";
+    print "</font>\n";
   }
 
 ?>

@@ -1,33 +1,30 @@
 <?php
 
+include "lib/mysql.php";
+
 if (isset($_GET["from"]))
   $min_time="from_base64(\"" . base64_encode("-".$_GET["from"]) . "\")";
 else
   $min_time="\"-7 00:00:00\"";
 
-$mysql = new mysqli("localhost", "webserver", "empty", "buildmaster");
-if ($mysql->connect_error) {
-  die("Connection failed: " . $mysql->connect_error);
-}
-if (! $result = $mysql -> query(
-    "SELECT DISTINCT ".
-    "UNIX_TIMESTAMP(`statistics`.`date`) AS `date`," .
-    "`statistics`.`pending_tasks_count`," .
-    "`statistics`.`pending_packages_count`," .
-    "`statistics`.`staging_packages_count`," .
-    "`statistics`.`testing_packages_count`," .
-    "`statistics`.`tested_packages_count`," .
-    "`statistics`.`broken_tasks_count`," .
-    "`statistics`.`dependency_loops_count`," .
-    "`statistics`.`dependency_looped_tasks_count`," .
-    "`statistics`.`locked_tasks_count`," .
-    "`statistics`.`blocked_tasks_count`," .
-    "`statistics`.`next_tasks_count`" .
-    "FROM `statistics` " .
-    "WHERE `statistics`.`date`>=ADDTIME(NOW()," . $min_time . ") " .
-    "ORDER BY `statistics`.`date`"
-  ))
-  die($mysql->error);
+$result = mysql_run_query(
+  "SELECT DISTINCT ".
+  "UNIX_TIMESTAMP(`statistics`.`date`) AS `date`," .
+  "`statistics`.`pending_tasks_count`," .
+  "`statistics`.`pending_packages_count`," .
+  "`statistics`.`staging_packages_count`," .
+  "`statistics`.`testing_packages_count`," .
+  "`statistics`.`tested_packages_count`," .
+  "`statistics`.`broken_tasks_count`," .
+  "`statistics`.`dependency_loops_count`," .
+  "`statistics`.`dependency_looped_tasks_count`," .
+  "`statistics`.`locked_tasks_count`," .
+  "`statistics`.`blocked_tasks_count`," .
+  "`statistics`.`next_tasks_count`" .
+  "FROM `statistics` " .
+  "WHERE `statistics`.`date`>=ADDTIME(NOW()," . $min_time . ") " .
+  "ORDER BY `statistics`.`date`"
+);
 
 $t_min = -1;
 $t_max = -1;
