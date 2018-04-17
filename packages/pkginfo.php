@@ -211,92 +211,87 @@
 
 ?>
 <!DOCTYPE html>
-
 <html lang="en">
-<head>
+  <head>
     <meta charset="utf-8" />
     <title>Arch Linux 32 - <?php print $content["Name"] . " " . $content["Version"] . " (" . $content["Architecture"]; ?>)</title>
     <link rel="stylesheet" type="text/css" href="/static/archweb.css" media="screen, projection" />
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
     <link rel="shortcut icon" type="image/x-icon" href="/static/favicon.ico" />
-    
-</head>
-<body class="">
+  </head>
+  <body class="">
     <div id="archnavbar" class="anb-packages">
-        <div id="archnavbarlogo"><h1><a href="/" title="Return to the main page">Arch Linux</a></h1></div>
-        <div id="archnavbarmenu">
-            <ul id="archnavbarlist">
-                <li id="anb-home"><a href="https://www.archlinux32.org/">Home</a></li>
-                <li id="anb-news"><a href="https://news.archlinux32.org/">News</a></li>
-                <li id="anb-packages"><a href="https://packages.archlinux32.org/">Packages</a></li>
-                <li id="anb-forums"><a href="https://bbs.archlinux32.org/">Forums</a></li>
-                <li id="anb-bugs"><a href="https://bugs.archlinux32.org/" title="Report and track bugs">Bugs</a></li>
-                <li id="anb-mailing-list"><a href="https://lists.archlinux.org/listinfo/arch-ports">Mailing List</a></li>
-                <li id="anb-download"><a href="https://www.archlinux32.org/download/" title="Get Arch Linux">Download</a></li>
-                <li id="anb-arch-linux-official"><a href="https://www.archlinux.org/">Arch Linux Official</a></li>
-            </ul>
-        </div>
+      <div id="archnavbarlogo">
+        <h1><a href="/" title="Return to the main page">Arch Linux</a></h1>
+      </div>
+      <div id="archnavbarmenu">
+        <ul id="archnavbarlist">
+          <li id="anb-home"><a href="https://www.archlinux32.org/">Home</a></li>
+          <li id="anb-news"><a href="https://news.archlinux32.org/">News</a></li>
+          <li id="anb-packages"><a href="https://packages.archlinux32.org/">Packages</a></li>
+          <li id="anb-forums"><a href="https://bbs.archlinux32.org/">Forums</a></li>
+          <li id="anb-bugs"><a href="https://bugs.archlinux32.org/" title="Report and track bugs">Bugs</a></li>
+          <li id="anb-mailing-list"><a href="https://lists.archlinux.org/listinfo/arch-ports">Mailing List</a></li>
+          <li id="anb-download"><a href="https://www.archlinux32.org/download/" title="Get Arch Linux">Download</a></li>
+          <li id="anb-arch-linux-official"><a href="https://www.archlinux.org/">Arch Linux Official</a></li>
+        </ul>
+      </div>
     </div>
     <div id="content">
-        <div id="archdev-navbar">
-            
-        </div>
-        
-        
-
-<div id="pkgdetails" class="box">
-    <h2><?php print $content["Name"]." ".$content["Version"]; ?></h2>
-
-    <div id="detailslinks" class="listing">
-        <div id="actionlist">
-        <h4>Package Actions</h4>
+      <div id="archdev-navbar">
+      </div>
+      <div id="pkgdetails" class="box">
+        <h2><?php print $content["Name"]." ".$content["Version"]; ?></h2>
+        <div id="detailslinks" class="listing">
+          <div id="actionlist">
+            <h4>Package Actions</h4>
             <ul class="small">
-                <li>
 <?php
   if ($content["uses_upstream"]) {
-    print "<a href=\"https://projects.archlinux.org/svntogit/";
+    print "              <li>\n";
+    print "                <a href=\"https://projects.archlinux.org/svntogit/";
     print $content["git_repo"];
     print ".git/tree/trunk?h=packages/";
     print $content["pkgbase"];
     print "\" title=\"View upstream's source files for ";
     print $content["pkgname"];
-    print "\">Upstream's Source Files</a> / ";
-    print "<a href=\"https://projects.archlinux.org/svntogit/";
+    print "\">Upstream's Source Files</a> /\n";
+    print "                <a href=\"https://projects.archlinux.org/svntogit/";
     print $content["git_repo"];
     print ".git/log/trunk?h=packages/";
     print $content["pkgbase"];
     print "\" title=\"View upstream's changes for ";
     print $content["pkgname"];
-    print "\">Upstream's Changes</a>";
-    if ($content["uses_modification"])
-      print "<br>\n";
+    print "\">Upstream's Changes</a>\n";
+    print "              </li>\n";
   }
   if ($content["uses_modification"]) {
-    print "<a href=\"https://github.com/archlinux32/packages/tree/master/";
+    print "              <li>\n";
+    print "                <a href=\"https://github.com/archlinux32/packages/tree/master/";
     print $content["repo"];
     print "/";
     print $content["pkgbase"];
     print "\" title=\"View archlinux32's source files for ";
     print $content["pkgname"];
-    print "\">Archlinux32's Source Files</a> / ";
-    print "<a href=\"https://github.com/archlinux32/packages/commits/master/";
+    print "\">Archlinux32's Source Files</a> /\n";
+    print "                <a href=\"https://github.com/archlinux32/packages/commits/master/";
     print $content["repo"];
     print "/";
     print $content["pkgbase"];
     print "\" title=\"View upstream's changes for ";
     print $content["pkgname"];
-    print "\">Archlinux32's Changes</a>";
+    print "\">Archlinux32's Changes</a>\n";
+    print "              </li>\n";
   }
 ?>
-                </li>
-                <li>
+              <li>
 <?php
-  print "<a href=\"https://bugs.archlinux32.org/index.php?string=";
+  print "                <a href=\"https://bugs.archlinux32.org/index.php?string=";
   print $content["Name"];
   print "\" title=\"View existing bug tickets for ";
   print $content["Name"];
-  print "\">Bug Reports</a> / ";
-  print "<a href=\"https://bugs.archlinux32.org/index.php?do=newtask&project=1&product_category=";
+  print "\">Bug Reports</a> / \n";
+  print "                <a href=\"https://bugs.archlinux32.org/index.php?do=newtask&project=1&product_category=";
   if ($content["repo_stability_name"]=="stable")
     print "8"; // stable
   elseif ($content["repo_stability_name"]=="testing")
@@ -309,184 +304,208 @@
   print $content["Name"];
   print "%5D+PLEASE+ENTER+SUMMARY\" title=\"Report new bug for ";
   print $content["Name"];
-  print "\">Add New Bug</a>";
+  print "\">Add New Bug</a>\n";
 ?>
-                </li>
-                <li><a href="http://pool.mirror.archlinux32.org/i686/<?php print $content["repo"]."/".$content["pkgname"]."-".$content["Version"]."-".$content["arch"]; ?>.pkg.tar.xz" rel="nofollow" title="Download <?php print $content["Name"]; ?> from mirror">Download From Mirror</a></li>
+              </li>
+              <li>
+                <a href="http://pool.mirror.archlinux32.org/i686/<?php 
+  print $content["repo"]."/".$content["pkgname"]."-".$content["Version"]."-".$content["arch"];
+?>.pkg.tar.xz" rel="nofollow" title="Download <?php print $content["Name"]; ?> from mirror">Download From Mirror</a>
+              </li>
             </ul>
-
-            
-        </div>
-
+          </div>
 <?php
 
 if (count($elsewhere)>0) {
-  print "<div id=\"elsewhere\" class=\"widget\">\n";
-  print "<h4>Versions Elsewhere</h4>\n";
+  print "          <div id=\"elsewhere\" class=\"widget\">\n";
+  print "            <h4>Versions Elsewhere</h4>\n";
   foreach ($elsewhere as $subst) {
-    print "<ul>\n";
-    print "<li>";
+    print "            <ul>\n";
+    print "              <li>\n";
     if ($subst["is_on_master_mirror"]) {
-      print "<a href=\"/" . $subst["repo"] . "/" . $subst["arch"] . "/" . $subst["pkgname"] ."/\"";
+      print "                <a href=\"/" . $subst["repo"] . "/" . $subst["arch"] . "/" . $subst["pkgname"] ."/\"";
       print " title=\"Package details for " . $subst["pkgname"] ."\">";
     }
     print $subst["pkgname"] . "-" . $subst["version"] . " [" . $subst["repo"] . "] (" . $subst["arch"] . ")";
     if ($subst["is_on_master_mirror"])
-      print "</a>";
-    print "</li>\n";
-    print "</ul>\n";
+      print "</a>\n";
+    print "              </li>\n";
+    print "            </ul>\n";
   }
-  print "</div>\n";
+  print "          </div>\n";
 }
 
 ?>
-    </div>
-
-    <div itemscope itemtype="http://schema.org/SoftwareApplication">
-    <meta itemprop="name" content="<?php print $content["Name"]; ?>"/>
-    <meta itemprop="version" content="<?php print $content["Version"]; ?>"/>
-    <meta itemprop="softwareVersion" content="<?php print $content["Version"]; ?>"/>
-    <meta itemprop="fileSize" content="<?php print $content["Download Size"]; ?>"/>
-    <meta itemprop="dateCreated" content="<?php print $content["Build Date"]; ?>"/>
-    <meta itemprop="datePublished" content="<?php print $content["Build Date"]; ?>"/>
-    <meta itemprop="operatingSystem" content="Arch Linux 32"/>
-    <table id="pkginfo">
-        <tr>
-            <th>Architecture:</th>
-            <td><a href="/?arch=<?php print $content["Architecture"]; ?>"
-                    title="Browse packages for <?php print $content["Architecture"]; ?> architecture"><?php print $content["Architecture"]; ?></a></td>
-        </tr><tr>
-            <th>Repository:</th>
-            <td><a href="/?repo=<?php print $content["Repository"]; ?>"
-                    title="Browse the <?php print $content["Repository"]; ?> repository"><?php print $content["Repository"]; ?></a></td>
-        </tr>
-        
-        
-        
-        <tr>
-            <th>Description:</th>
-            <td class="wrap" itemprop="description"><?php print $content["Description"]; ?></td>
-        </tr><tr>
-            <th>Upstream URL:</th>
-            <td><a itemprop="url" href="<?php print $content["URL"]; ?>"
-                    title="Visit the website for <?php print $content["Name"]; ?>"><?php print $content["URL"]; ?></a></td>
-        </tr><tr>
-            <th>License(s):</th>
-            <td class="wrap"><?php
+        </div>
+        <div itemscope itemtype="http://schema.org/SoftwareApplication">
+          <meta itemprop="name" content="<?php print $content["Name"]; ?>"/>
+          <meta itemprop="version" content="<?php print $content["Version"]; ?>"/>
+          <meta itemprop="softwareVersion" content="<?php print $content["Version"]; ?>"/>
+          <meta itemprop="fileSize" content="<?php print $content["Download Size"]; ?>"/>
+          <meta itemprop="dateCreated" content="<?php print $content["Build Date"]; ?>"/>
+          <meta itemprop="datePublished" content="<?php print $content["Build Date"]; ?>"/>
+          <meta itemprop="operatingSystem" content="Arch Linux 32"/>
+          <table id="pkginfo">
+            <tr>
+              <th>
+                Architecture:
+              </th>
+              <td>
+                <a href="/?arch=<?php print $content["Architecture"]; ?>" title="Browse packages for <?php print $content["Architecture"]; ?> architecture"><?php print $content["Architecture"]; ?></a>
+              </td>
+            </tr>
+            <tr>
+              <th>
+                Repository:
+              </th>
+              <td>
+                <a href="/?repo=<?php print $content["Repository"]; ?>" title="Browse the <?php print $content["Repository"]; ?> repository"><?php print $content["Repository"]; ?></a>
+              </td>
+            </tr>
+            <tr>
+              <th>
+                Description:
+              </th>
+              <td class="wrap" itemprop="description">
+                <?php print $content["Description"]."\n"; ?>
+              </td>
+            </tr>
+            <tr>
+              <th>
+                Upstream URL:
+              </th>
+              <td>
+                <a itemprop="url" href="<?php print $content["URL"]; ?>" title="Visit the website for <?php print $content["Name"]; ?>"><?php print $content["URL"]; ?></a>
+              </td>
+            </tr>
+            <tr>
+              <th>
+                License(s):
+              </th>
+              <td class="wrap">
+                <?php
   if (is_array($content["Licenses"]))
     print implode(", ",$content["Licenses"]);
   else
     print $content["Licenses"];
-?></td>
-        </tr>
-        
-        <tr>
-            <th>Package Size:</th>
-            <td><?php print $content["Download Size"]; ?></td>
-        </tr><tr>
-            <th>Installed Size:</th>
-            <td><?php print $content["Installed Size"]; ?></td>
-        </tr><tr>
-            <th>Build Date:</th>
-            <td><?php print $content["Build Date"]; ?></td>
-        </tr>
-        
-    </table>
-    </div>
-
-    <div id="metadata">
-        
-        <div id="pkgdeps" class="listing">
+  print "\n";
+?>
+              </td>
+            </tr>
+            <tr>
+              <th>
+                Package Size:
+              </th>
+              <td>
+                <?php print $content["Download Size"]."\n"; ?>
+              </td>
+            </tr>
+            <tr>
+              <th>
+                Installed Size:
+              </th>
+              <td>
+                <?php print $content["Installed Size"]."\n"; ?>
+              </td>
+            </tr>
+            <tr>
+              <th>
+                Build Date:
+              </th>
+              <td>
+                <?php print $content["Build Date"]."\n"; ?>
+              </td>
+            </tr>
+          </table>
+        </div>
+        <div id="metadata">
+          <div id="pkgdeps" class="listing">
             <h3 title="<?php print $content["Name"]; ?> has the following dependencies">
-                Dependencies (<?php print count($dependencies); ?>)</h3>
+              Dependencies (<?php print count($dependencies); ?>)
+            </h3>
             <ul id="pkgdepslist">
 <?php
   foreach ($dependencies as $dep) {
-    print "<li>\n";
+    print "              <li>\n";
     if (count($dep["deps"]) == 0) {
-      print "<font color=\"#ff0000\">not satisfiable dependency: \"" . $dep["install_target"] . "\"</font>\n";
+      print "                <font color=\"#ff0000\">not satisfiable dependency: \"" . $dep["install_target"] . "\"</font>\n";
     } else {
       $virtual_dep = (
         (count($dep["deps"]) > 1) ||
         (array_values($dep["deps"])[0]["pkgname"] != $dep["install_target"])
       );
       if ($virtual_dep) {
+        print "                ";
         print $dep["install_target"];
-        print " <span class=\"virtual-dep\">(";
+        print " <span class=\"virtual-dep\">(\n";
       };
       $first = true;
       foreach ($dep["deps"] as $d_p) {
         if (!$first)
           print ",\n";
         $first = false;
-        print "<a href=\"/".$d_p["repo"]."/".$d_p["arch"]."/".$d_p["pkgname"]."/\" ";
+        print "                <a href=\"/".$d_p["repo"]."/".$d_p["arch"]."/".$d_p["pkgname"]."/\" ";
         print "title=\"View package details for ".$d_p["pkgname"]."\">".$d_p["pkgname"]."</a>";
       }
       if ($virtual_dep)
-        print ")</span>";
+        print "\n                )</span>";
       print "\n";
     };
     if ($dep["dependency_type"]!="run")
-      print "<span class=\"" . $dep["dependency_type"] . "-dep\"> (" . $dep["dependency_type"] . ")</span>\n";
-    print "</li>\n";
+      print "                <span class=\"" . $dep["dependency_type"] . "-dep\"> (" . $dep["dependency_type"] . ")</span>\n";
+    print "              </li>\n";
   }
 ?>
             </ul>
-        </div>
-        
-        
-        <div id="pkgreqs" class="listing">
+          </div>
+          <div id="pkgreqs" class="listing">
             <h3 title="Packages that require <?php print $content["Name"]; ?>">
-                Required By (<?php print count($dependent); ?>)</h3>
+              Required By (<?php print count($dependent); ?>)
+            </h3>
             <ul id="pkgreqslist">
 <?php
   foreach ($dependent as $dep) {
-    print "<li>\n";
+    print "              <li>\n";
     if ($dep["install_target"] != $content["Name"])
-      print $dep["install_target"] . " (";
-    print "<a href=\"/".$dep["repo"]."/".$dep["arch"]."/".$dep["pkgname"]."/\" ";
-    print "title=\"View package details for ".$dep["pkgname"]."\">".$dep["pkgname"]."</a>";
+      print "                ".$dep["install_target"] . " (\n";
+    print "                <a href=\"/".$dep["repo"]."/".$dep["arch"]."/".$dep["pkgname"]."/\" ";
+    print "title=\"View package details for ".$dep["pkgname"]."\">".$dep["pkgname"]."</a>\n";
     if ($dep["install_target"] != $content["Name"])
-      print ")";
-    print "\n";
+      print "                )\n";
     if ($dep["dependency_type"] != "run")
-      print "<span class=\"" . $dep["dependency_type"] . "-dep\"> (" . $dep["dependency_type"] . ")</span>\n";
-    print "</li>\n";
+      print "                <span class=\"" . $dep["dependency_type"] . "-dep\"> (" . $dep["dependency_type"] . ")</span>\n";
+    print "              </li>\n";
   }
 ?>
             </ul>
+          </div>
+          <div id="pkgfiles">
+          </div>
         </div>
-        <div id="pkgfiles">
-        </div>
-    </div>
-</div>
-
-
-        <div id="footer">
-            <p>Copyright © 2002-2018 <a href="mailto:jvinet@zeroflux.org"
-                title="Contact Judd Vinet">Judd Vinet</a> and <a href="mailto:aaron@archlinux.org"
-                title="Contact Aaron Griffin">Aaron Griffin</a>.</p>
-
-            <p>The Arch Linux name and logo are recognized
-            <a href="https://wiki.archlinux.org/index.php/DeveloperWiki:TrademarkPolicy"
-                title="Arch Linux Trademark Policy">trademarks</a>. Some rights reserved.</p>
-
-            <p>The registered trademark Linux® is used pursuant to a sublicense from LMI,
-            the exclusive licensee of Linus Torvalds, owner of the mark on a world-wide basis.</p>
-        </div>
+      </div>
+      <div id="footer">
+        <p>
+          Copyright © 2002-2018 <a href="mailto:jvinet@zeroflux.org" title="Contact Judd Vinet">Judd Vinet</a> and <a href="mailto:aaron@archlinux.org" title="Contact Aaron Griffin">Aaron Griffin</a>.
+        </p>
+        <p>
+          The Arch Linux name and logo are recognized <a href="https://wiki.archlinux.org/index.php/DeveloperWiki:TrademarkPolicy" title="Arch Linux Trademark Policy">trademarks</a>. Some rights reserved.
+        </p>
+        <p>
+          The registered trademark Linux® is used pursuant to a sublicense from LMI, the exclusive licensee of Linus Torvalds, owner of the mark on a world-wide basis.
+        </p>
+      </div>
     </div>
     <script type="application/ld+json">
-    {
-       "@context": "http://schema.org",
-       "@type": "WebSite",
-       "url": "/",
-       "potentialAction": {
-         "@type": "SearchAction",
-         "target": "/?q={search_term}",
-         "query-input": "required name=search_term"
-       }
-    }
+      {
+        "@context": "http://schema.org",
+        "@type": "WebSite",
+        "url": "/",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "/?q={search_term}",
+          "query-input": "required name=search_term"
+        }
+      }
     </script>
-    
-</body>
+  </body>
 </html>
