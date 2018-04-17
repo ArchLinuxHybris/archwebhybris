@@ -147,6 +147,7 @@
     "`dependency_types`.`name` AS `dependency_type`," .
     "`install_targets`.`name` AS `install_target`," .
     "`repositories`.`name` AS `repo`," .
+    "`repositories`.`is_on_master_mirror`," .
     "`architectures`.`name` AS `arch`," .
     "`binary_packages`.`pkgname`" .
     " FROM `install_target_providers`" .
@@ -173,7 +174,13 @@
       " AND `subst_rsr`.`more_stable`=" . $mysql_content["repo_stability"] .
     ")" .
     " GROUP BY `binary_packages`.`id`,`dependency_types`.`id`" .
-    " ORDER BY FIELD (`dependency_types`.`name`,\"run\",\"make\",\"check\",\"link\"), `install_targets`.`name`!=`binary_packages`.`pkgname`, `install_targets`.`name`, `binary_packages`.`pkgname`"
+    " ORDER BY" .
+      " FIELD (`dependency_types`.`name`,\"run\",\"make\",\"check\",\"link\")," .
+      " `install_targets`.`name`!=`binary_packages`.`pkgname`," .
+      " `install_targets`.`name`," .
+      " `binary_packages`.`pkgname`," .
+      " `repositories`.`stability`," .
+      " `repositories`.`name`"
   );
 
   $dependent = array();
@@ -468,8 +475,17 @@ if (count($elsewhere)>0) {
     print "              <li>\n";
     if ($dep["install_target"] != $content["Name"])
       print "                ".$dep["install_target"] . " (\n";
-    print "                <a href=\"/".$dep["repo"]."/".$dep["arch"]."/".$dep["pkgname"]."/\" ";
-    print "title=\"View package details for ".$dep["pkgname"]."\">".$dep["pkgname"]."</a>\n";
+    print "                ";
+    if ($dep["is_on_master_mirror"]=="1") {
+      print "<a href=\"/".$dep["repo"]."/".$dep["arch"]."/".$dep["pkgname"]."/\" ";
+      print "title=\"View package details for ".$dep["pkgname"]."\">";
+    }
+    print $dep["pkgname"];
+    if ($dep["repo"] != $content["repo"])
+      print " [" . $dep["repo"] . "]";
+    if ($dep["is_on_master_mirror"]=="1")
+      print "</a>";
+    print "\n";
     if ($dep["install_target"] != $content["Name"])
       print "                )\n";
     if ($dep["dependency_type"] != "run")
