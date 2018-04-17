@@ -5,12 +5,16 @@
   $result = mysql_run_query(
     "SELECT" .
     " `build_slaves`.`name`," .
-    "`build_slaves`.`operator`," .
+    "`persons`.`name` AS `operator`," .
     "`package_sources`.`pkgbase`," .
     "`build_slaves`.`last_connection`," .
     "`build_slaves`.`logged_lines`," .
     "`build_slaves`.`last_action`" .
     " FROM `build_slaves`" .
+    " JOIN `ssh_keys` ON" .
+    " `build_slaves`.`ssh_key`=`ssh_keys`.`id`" .
+    " JOIN `persons` ON" .
+    " `ssh_keys`.`owner`=`persons`.`id`" .
     " LEFT JOIN `build_assignments` ON" .
     " `build_slaves`.`currently_building`=`build_assignments`.`id`" .
     " LEFT JOIN `package_sources` ON" .
