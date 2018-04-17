@@ -1,6 +1,6 @@
-<html>
-<head>
 <?php
+
+include "lib/mysql.php";
 
 if (isset($_GET["show"]))
   $to_show=$_GET["show"];
@@ -14,21 +14,9 @@ elseif ($to_show == "broken")
 elseif ($to_show == "next")
   $match = "";
 else
-  die();
+  die_500("Unknown parameter for \"show\".");
 
-print "<title>List of " . $to_show . " package builds</title>\n";
-print "<link rel=\"stylesheet\" type=\"text/css\" href=\"/static/style.css\">\n";
-print "</head>\n";
-print "<body>\n";
-print "<a href=\"https://buildmaster.archlinux32.org/\">Start page</a>\n";
-print "<a href=\"https://buildmaster.archlinux32.org/build-logs/\">build logs</a><br>\n";
-
-$mysql = new mysqli("localhost", "webserver", "empty", "buildmaster");
-if ($mysql->connect_error) {
-  die("Connection failed: " . $mysql->connect_error);
-}
-
-$result = $mysql -> query(
+$result = mysql_run_query(
   "SELECT DISTINCT " .
   "`build_assignments`.`id`," .
   "`build_assignments`.`is_blocked`," .
@@ -65,6 +53,7 @@ $result = $mysql -> query(
   "LEFT JOIN `build_slaves` ON `build_slaves`.`currently_building`=`build_assignments`.`id` " .
   "WHERE `repositories`.`name`=\"build-list\"" . $match
 );
+
 if ($result -> num_rows > 0) {
 
   $count = 0;
@@ -76,7 +65,7 @@ if ($result -> num_rows > 0) {
       ($row["dependencies_pending"]==1))
       continue;
 
-    $fail_result = $mysql -> query(
+    $fail_result = mysql_run_query(
       "SELECT " .
       "`fail_reasons`.`name`, " .
       "`failed_builds`.`log_file` " .
@@ -166,6 +155,22 @@ if ($result -> num_rows > 0) {
       $rows[$count]["build_slave"] = "&nbsp;";
     $count++;
   }
+
+}
+
+?>
+<html>
+<head>
+<?php
+
+print "<title>List of " . $to_show . " package builds</title>\n";
+print "<link rel=\"stylesheet\" type=\"text/css\" href=\"/static/style.css\">\n";
+print "</head>\n";
+print "<body>\n";
+print "<a href=\"https://buildmaster.archlinux32.org/\">Start page</a>\n";
+print "<a href=\"https://buildmaster.archlinux32.org/build-logs/\">build logs</a><br>\n";
+
+if ($count > 0) {
 
   usort(
     $rows,
