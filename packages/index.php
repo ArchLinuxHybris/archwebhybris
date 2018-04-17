@@ -2,17 +2,16 @@
 
   include "lib/mysql.php";
 
-?>
-<!DOCTYPE html>
-
-<?php
-
   foreach (array("bugs","sort") as $expected_param)
     if (! isset($_GET[$expected_param]))
       $_GET[$expected_param] = "";
 
-?>
+  $result = mysql_run_query(
+    "SELECT `name` FROM `architectures` ORDER BY `name`"
+  );
 
+?>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -51,11 +50,6 @@
                 <label for="id_arch" title="Limit results to a specific CPU architecture">
                     Arch</label><select multiple="multiple" id="id_arch" name="arch">
 <?php
-
-if (! $result = $mysql -> query(
-  "SELECT `name` FROM `architectures` ORDER BY `name`"
-  ))
-  die ($mysql -> error);
 
 while ($row = $result -> fetch_assoc()) {
   $archs[$row["name"]] = $row["name"];
