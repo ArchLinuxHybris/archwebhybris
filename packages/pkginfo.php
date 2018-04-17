@@ -14,11 +14,7 @@
 
   $json_content = $json_content["package"];
 
-  $mysql = new mysqli("localhost", "webserver", "empty", "buildmaster");
-  if ($mysql->connect_error)
-    die_500("Connection to database failed: " . $mysql->connect_error);
-
-  if (! $mysql_result = $mysql -> query(
+  $mysql_result = mysql_run_query(
     "SELECT DISTINCT " .
     "`binary_packages`.`id`," .
     "`binary_packages`.`pkgname`," .
@@ -47,8 +43,7 @@
     " WHERE `binary_packages`.`pkgname`=from_base64(\"" . base64_encode($_GET["pkgname"]) . "\")" .
     " AND `architectures`.`name`=from_base64(\"" . base64_encode($_GET["arch"]) . "\")" .
     " AND `repositories`.`name`=from_base64(\"" . base64_encode($_GET["repo"]) . "\")"
-    ))
-    die_500("Query failed: " . $mysql->error);
+  );
 
   if ($mysql_result -> num_rows != 1)
     throw_http_error(404, "Package Not Found In Buildmaster's Database");
@@ -72,7 +67,7 @@
 
   // query _all_ dependencies
 
-  if (! $mysql_result = $mysql -> query(
+  $mysql_result = mysql_run_query(
     "SELECT DISTINCT " .
     "`dependency_types`.`name` AS `dependency_type`," .
     "GROUP_CONCAT(" .
@@ -110,8 +105,7 @@
     ")" .
     " GROUP BY `install_targets`.`id`,`dependency_types`.`id`" .
     " ORDER BY FIELD (`dependency_types`.`name`,\"run\",\"make\",\"check\",\"link\"), `install_targets`.`name`"
-    ))
-    die_500("Query failed: " . $mysql->error);
+  );
 
   $dependencies = array();
   while ($row = $mysql_result -> fetch_assoc()) {
@@ -148,7 +142,7 @@
 
   // query dependent packages
 
-  if (! $mysql_result = $mysql -> query(
+  $mysql_result = mysql_run_query(
     "SELECT DISTINCT " .
     "`dependency_types`.`name` AS `dependency_type`," .
     "`install_targets`.`name` AS `install_target`," .
@@ -180,8 +174,7 @@
     ")" .
     " GROUP BY `binary_packages`.`id`,`dependency_types`.`id`" .
     " ORDER BY FIELD (`dependency_types`.`name`,\"run\",\"make\",\"check\",\"link\"), `install_targets`.`name`!=`binary_packages`.`pkgname`, `install_targets`.`name`, `binary_packages`.`pkgname`"
-    ))
-    die_500("Query failed: " . $mysql->error);
+  );
 
   $dependent = array();
   while ($row = $mysql_result -> fetch_assoc())
@@ -191,7 +184,7 @@
 
   // query substitutes
 
-  if (! $mysql_result = $mysql -> query(
+  $mysql_result = mysql_run_query(
     "SELECT " .
     "`binary_packages`.`pkgname` AS `pkgname`," .
     "`repositories`.`name` AS `repo`," .
@@ -210,8 +203,7 @@
     " ON `binary_packages`.`pkgname`=`original`.`pkgname`" .
     " AND `binary_packages`.`id`!=`original`.`id`" .
     " WHERE `original`.`id`=" . $mysql_content["id"]
-    ))
-    die_500("Query failed: " . $mysql->error);
+  );
 
   $elsewhere = array();
   while ($row = $mysql_result -> fetch_assoc())
