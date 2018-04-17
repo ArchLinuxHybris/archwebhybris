@@ -27,6 +27,8 @@
 <body>
 <?php
 
+show_warning_on_offline_slave();
+
 if ($result -> num_rows > 0) {
 
   $count = 0;

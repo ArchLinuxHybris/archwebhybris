@@ -71,6 +71,7 @@ if (isset($_GET["graph"])) {
     print "<title>Todos in the build scripts</title>\n";
     print "</head>\n";
     print "<body>\n";
+    show_warning_on_offline_slave();
 
     while ($row = $result->fetch_assoc()) {
       print "<a href=\"#TODO" . $row["id"] . "\">TODO #" . $row["id"] . "</a>";

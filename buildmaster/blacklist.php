@@ -18,6 +18,7 @@
     <link rel="stylesheet" type="text/css" href="/static/style.css">
   </head>
   <body>
+<?php show_warning_on_offline_slave(); ?>
     <table>
       <tr>
         <th>architecture</th>

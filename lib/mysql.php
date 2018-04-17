@@ -22,6 +22,6 @@ function show_warning_on_offline_slave() {
   $result = mysql_run_query("SHOW STATUS LIKE \"Slave_running\"");
   if (($result -> num_rows == 0) ||
     ($result -> fetch_assoc() ["Value"] != "ON")) {
-    print "<div><font color=\"fff0000\">The replication slave is currently not running. The database might be outdated.</font></div>";
+    print "<div><font color=\"fff0000\">The replication slave is currently not running. The database might be outdated.</font></div>\n";
   }
 }

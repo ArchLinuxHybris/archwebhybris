@@ -25,6 +25,7 @@
   </head>
   <body>
 <?php
+show_warning_on_offline_slave();
 
   print "<table border=1>\n";
   if ($result->num_rows > 0) {

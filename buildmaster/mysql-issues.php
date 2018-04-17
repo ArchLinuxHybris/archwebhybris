@@ -95,21 +95,22 @@
 
 ?>
 <html>
-<head>
-<title>More and less critical issues with the database</title>
-<link rel="stylesheet" type="text/css" href="/static/style.css">
-</head>
-<body>
-<a href="https://buildmaster.archlinux32.org/">Start page</a><br>
+  <head>
+    <title>More and less critical issues with the database</title>
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+  </head>
+  <body>
+<?php show_warning_on_offline_slave(); ?>
+    <a href="https://buildmaster.archlinux32.org/">Start page</a><br>
 <?php
 
-  print "Found " . count( $serious_issues ) . " serious issues.<br>\n";
+  print "    Found " . count( $serious_issues ) . " serious issues.<br>\n";
 
   foreach ( $serious_issues as $row ) {
     if ($row["is_to_be_deleted"]==1)
-      print "<font color=\"#00ff00\">(marked as to-be-deleted) ";
+      print "    <font color=\"#00ff00\">(marked as to-be-deleted) ";
     else
-      print "<font color=\"#ff0000\">";
+      print "    <font color=\"#ff0000\">";
     print $row["pkgfile"] . " depends on " . $row["install_target"] . " which is not provided by any package";
     if (isset($row["subst_repository"]))
       print " - but can be replaced by the one in " . $row["subst_repository"];
@@ -119,17 +120,17 @@
     print "</font>\n";
   }
 
-  print "Found " . count( $stability_issues ) . " stability issues.<br>\n";
+  print "    Found " . count( $stability_issues ) . " stability issues.<br>\n";
 
   foreach ( $stability_issues as $row ) {
     if ($row["is_to_be_deleted"]==1)
-      print "<font color=\"#00ff00\">(marked as to-be-deleted) ";
+      print "    <font color=\"#00ff00\">(marked as to-be-deleted) ";
     else
-      print "<font color=\"#800000\">";
+      print "    <font color=\"#800000\">";
     print $row["pkgfile"] . " depends on " . $row["install_target"] . " which is not provided by any package installable from enabled " . $row["stability"] . " repositories.<br>";
     print "</font>\n";
   }
 
 ?>
-</body>
+  </body>
 </html>

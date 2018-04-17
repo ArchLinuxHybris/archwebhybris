@@ -262,6 +262,7 @@
     <link rel="shortcut icon" type="image/x-icon" href="/static/favicon.ico" />
   </head>
   <body class="">
+<?php show_warning_on_offline_slave(); ?>
     <div id="archnavbar" class="anb-packages">
       <div id="archnavbarlogo"><h1><a href="/" title="Return to the main page">Arch Linux</a></h1></div>
       <div id="archnavbarmenu">
