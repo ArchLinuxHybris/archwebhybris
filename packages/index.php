@@ -1,3 +1,8 @@
+<?php
+
+  include "lib/mysql.php";
+
+?>
 <!DOCTYPE html>
 
 <?php
@@ -46,11 +51,6 @@
                 <label for="id_arch" title="Limit results to a specific CPU architecture">
                     Arch</label><select multiple="multiple" id="id_arch" name="arch">
 <?php
-
-$mysql = new mysqli("localhost", "webserver", "empty", "buildmaster");
-if ($mysql->connect_error) {
-  die("Connection failed: " . $mysql->connect_error);
-}
 
 if (! $result = $mysql -> query(
   "SELECT `name` FROM `architectures` ORDER BY `name`"
