@@ -2,6 +2,11 @@
 
   include "lib/mysql.php";
 
+  if (isset($_GET["from"]))
+    $min_time = $_GET["from"];
+  else
+    $min_time = "00:42:00";
+
   $result = mysql_run_query(
     "SELECT `ssh_log`.`date`," .
     "`build_slaves`.`name`," .
@@ -9,7 +14,10 @@
     "`ssh_log`.`parameters`" .
     " FROM `ssh_log`" .
     " JOIN `build_slaves` ON `ssh_log`.`build_slave`=`build_slaves`.`id`" .
-    " WHERE TIMEDIFF(NOW(),`ssh_log`.`date`) < \"10:00\"" .
+    " WHERE TIMEDIFF((" .
+  // NOW() is wrong here - due to differing time zones O.o
+      "SELECT MAX(`l`.`date`) FROM `ssh_log` AS `l`" .
+    "),`ssh_log`.`date`) < from_base64(\"" . base64_encode( $min_time ) . "\")" .
     " ORDER BY `ssh_log`.`date` DESC"
   );
 
