@@ -74,7 +74,7 @@ if (isset($_GET["graph"])) {
     show_warning_on_offline_slave();
 
     while ($row = $result->fetch_assoc()) {
-      print "<a href=\"#TODO" . $row["id"] . "\">TODO #" . $row["id"] . "</a>";
+      print "<a href=\"#TODO" . $row["id"] . "\" name=\"TODO" . $row["id"] ."\">TODO #" . $row["id"] . "</a>";
       print " - ";
       print "<a href=\"https://github.com/archlinux32/builder/blob/master/" . $row["file"] . "#L" . $row["line"] . "\">" . $row["file"] . "(line " . $row["line"] . ")</a>";
       print ":<br>\n";
