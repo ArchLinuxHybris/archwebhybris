@@ -60,6 +60,7 @@
     " JOIN `architectures` ON `architectures`.`id`=`binary_packages`.`architecture`" .
     " JOIN `repositories` ON `repositories`.`id`=`binary_packages`.`repository`" .
     " AND `repositories`.`is_on_master_mirror`" .
+    " JOIN `build_assignments` ON `build_assignments`.`id`=`binary_packages`.`build_assignment`" .
     $filter . $exact_filter .
     " ORDER BY ";
 
@@ -74,7 +75,8 @@
     "`binary_packages`.`pkgver`,\"-\"," .
     "`binary_packages`.`pkgrel`,\".\"," .
     "`binary_packages`.`sub_pkgrel`) AS `version`," .
-    "IF(`binary_packages`.`has_issues`,1,0) AS `has_issues`" .
+    "IF(`binary_packages`.`has_issues`,1,0) AS `has_issues`," .
+    "`build_assignments`.`return_date` AS `build_date`" .
     $query
   );
   $exact_matches = array();
@@ -106,6 +108,11 @@
       "title" => "bug status",
       "label" => "Bugs",
       "mysql" => "NOT `binary_packages`.`has_issues`"
+    ),
+    "build_date" => array(
+      "title" => "build date",
+      "label" => "Build Date",
+      "mysql" => "IFNULL(`build_assignments`.`return_date`,\"00-00-0000 00:00:00\")"
     )
   );
 
@@ -113,6 +120,7 @@
     " JOIN `architectures` ON `architectures`.`id`=`binary_packages`.`architecture`" .
     " JOIN `repositories` ON `repositories`.`id`=`binary_packages`.`repository`" .
     " AND `repositories`.`is_on_master_mirror`" .
+    " JOIN `build_assignments` ON `build_assignments`.`id`=`binary_packages`.`build_assignment`" .
     $filter . $fuzzy_filter .
     " ORDER BY ";
 
@@ -145,7 +153,8 @@
     "`binary_packages`.`pkgver`,\"-\"," .
     "`binary_packages`.`pkgrel`,\".\"," .
     "`binary_packages`.`sub_pkgrel`) AS `version`," .
-    "IF(`binary_packages`.`has_issues`,1,0) AS `has_issues`" .
+    "IF(`binary_packages`.`has_issues`,1,0) AS `has_issues`," .
+    "`build_assignments`.`return_date` AS `build_date`" .
     $query .
     " LIMIT " . (($page-1)*100) . ", 100"
   );
@@ -177,6 +186,9 @@
       else
         print "&nbsp;";
       print "\n";
+      print "            </td>\n";
+      print "            <td>\n";
+      print "              " . $row["build_date"] . "\n";
       print "            </td>\n";
       print "          </tr>\n";
       if ($oddity == "odd" )
