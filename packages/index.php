@@ -63,13 +63,6 @@
     $filter . $exact_filter .
     " ORDER BY ";
 
-  if (isset($_GET["sort"])) {
-    if (isset($sorts[$_GET["sort"]]["mysql"]))
-      $query .= $sorts[$_GET["sort"]]["mysql"] . ",";
-    elseif (isset($sorts[substr($_GET["sort"],1)]["mysql"]))
-      $query .= $sorts[substr($_GET["sort"],1)]["mysql"] . " DESC,";
-  }
-
   $query .= "`binary_packages`.`pkgname`,`repositories`.`stability`,`repositories`.`name`,`architectures`.`name`";
 
   $result = mysql_run_query(
