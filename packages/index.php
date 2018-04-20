@@ -353,11 +353,14 @@ if (count($exact_matches) > 0) {
         <table class="results">
           <thead>
             <tr>
-              <th>Arch</th>
-              <th>Repo</th>
-              <th>Name</th>
-              <th>Version</th>
-              <th>Bugs</th>
+<?php
+
+  foreach ($sorts as $get => $sort) {
+    print "              <th>\n";
+    print "                ".$sort["label"]."\n";
+    print "              </th>\n";
+  }
+?>
             </tr>
           </thead>
           <tbody>
