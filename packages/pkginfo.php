@@ -294,6 +294,15 @@
 ?>
               <li>
 <?php
+  print "                <a href=\"https://www.archlinux.org/packages/?sort=&q=";
+  print $content["Name"];
+  print "&maintainer=&flagged=\">";
+  print "Search for ".$content["Name"]." upstream";
+  print "</a>\n";
+?>
+              </li>
+              <li>
+<?php
   print "                <a href=\"https://bugs.archlinux32.org/index.php?string=";
   print $content["Name"];
   print "\" title=\"View existing bug tickets for ";
