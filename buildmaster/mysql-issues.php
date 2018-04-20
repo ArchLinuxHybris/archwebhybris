@@ -45,7 +45,7 @@
       " WHERE `install_target_providers`.`install_target` = `dependencies`.`depending_on`" .
     ")" .
     $ignore .
-    " ORDER BY `is_to_be_deleted`, `binary_packages`.`pkgname`"
+    " ORDER BY `is_to_be_deleted`,`binary_packages`.`pkgname`,`install_targets`.`name`"
   );
 
   $serious_issues = array();
@@ -86,7 +86,7 @@
       " AND `repositories`.`stability`=`repository_stability_relations`.`less_stable`" .
     ")" .
     $ignore .
-    " ORDER BY `is_to_be_deleted`, `binary_packages`.`pkgname`"
+    " ORDER BY `is_to_be_deleted`,`binary_packages`.`pkgname`,`install_targets`.`name`"
   );
 
   $stability_issues = array();
