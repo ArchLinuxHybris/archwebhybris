@@ -188,7 +188,12 @@
       print "\n";
       print "            </td>\n";
       print "            <td>\n";
-      print "              " . $row["build_date"] . "\n";
+      print "              ";
+      if (isset($row["build_date"]))
+        print $row["build_date"];
+      else
+        print "&nbsp;";
+      print "\n";
       print "            </td>\n";
       print "          </tr>\n";
       if ($oddity == "odd" )
