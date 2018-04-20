@@ -28,8 +28,8 @@ $result = mysql_run_query(
   "`upstream_repositories`.`name` AS `package_repository`," .
   "`git_repositories`.`name` AS `git_repository`," .
   "`architectures`.`name` AS `arch`," .
-  "EXISTS (SELECT * " .
-    "FROM `binary_packages` `broken_bin` " .
+  "EXISTS (SELECT 1 " .
+    "FROM `binary_packages` AS `broken_bin` " .
     "JOIN `dependencies` ON `dependencies`.`dependent` = `broken_bin`.`id` " .
     "JOIN `install_target_providers` ON `install_target_providers`.`install_target` = `dependencies`.`depending_on` " .
     "JOIN `binary_packages` `to_be_built` ON `to_be_built`.`id` = `install_target_providers`.`package` " .
@@ -38,7 +38,7 @@ $result = mysql_run_query(
     "AND `repositories`.`name`=\"build-list\" " .
     "AND `to_be_built`.`build_assignment`!=`build_assignments`.`id`" .
   ") AS `dependencies_pending`," .
-  "(SELECT count(*) " .
+  "(SELECT count(1) " .
     "FROM `build_dependency_loops` " .
     "WHERE `build_dependency_loops`.`build_assignment`=`build_assignments`.`id`" .
   ") AS `loops`, " .
