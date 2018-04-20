@@ -207,23 +207,23 @@
 
     global $page, $pages, $num_results;
 
-    print "    <div class=\"pkglist-stats\">\n";
-    print "      <p>\n";
-    print "        " . $num_results . " matching package";
+    print "        <div class=\"pkglist-stats\">\n";
+    print "          <p>\n";
+    print "            " . $num_results . " matching package";
     if ($num_results != 1)
       print "s";
     print " found.\n";
 
     if ($pages != 1)
-      print "        Page " . $page . " of " . $pages . ".\n";
+      print "            Page " . $page . " of " . $pages . ".\n";
 
-    print "      </p>\n";
+    print "          </p>\n";
 
     if ($pages != 1) {
-      print "      <div class=\"pkglist-nav\">\n";
-      print "        <span class=\"prev\">\n";
+      print "          <div class=\"pkglist-nav\">\n";
+      print "            <span class=\"prev\">\n";
 
-      print "          ";
+      print "              ";
       if ($page > 1) {
         print "<a href=\"?";
         print substr(str_replace(
@@ -237,10 +237,10 @@
       if ($page > 1)
         print "</a>";
       print "\n";
-      print "        </span>\n";
-      print "        <span class=\"next\">\n";
+      print "            </span>\n";
+      print "            <span class=\"next\">\n";
 
-      print "          ";
+      print "              ";
       if ($page < $pages) {
         print "<a href=\"?";
         print substr(str_replace(
@@ -254,10 +254,10 @@
       if ($page < $pages)
         print "</a>";
       print "\n";
-      print "        </span>\n";
-      print "      </div>\n";
+      print "            </span>\n";
+      print "          </div>\n";
     };
-    print "    </div>\n";
+    print "        </div>\n";
 
   };
 
@@ -289,42 +289,42 @@
       </div>
     </div>
     <div id="content">
-    <div id="pkglist-search" class="box filter-criteria">
-      <h2>Package Search</h2>
-      <form id="pkg-search" method="get" action="/">
-        <p><input id="id_sort" name="sort" type="hidden" /></p>
-        <fieldset>
-          <legend>Enter search criteria</legend>
+      <div id="pkglist-search" class="box filter-criteria">
+        <h2>Package Search</h2>
+        <form id="pkg-search" method="get" action="/">
+          <p><input id="id_sort" name="sort" type="hidden" /></p>
+          <fieldset>
+            <legend>Enter search criteria</legend>
 <?php
   foreach ($search_criteria as $criterium) {
-    print "          <div>\n";
-    print "            <label for=\"id_" . $criterium["name"] . "\" title=\"Limit results to a specific " . $criterium["title"] . "\">";
+    print "            <div>\n";
+    print "              <label for=\"id_" . $criterium["name"] . "\" title=\"Limit results to a specific " . $criterium["title"] . "\">";
     print $criterium["label"];
     print "</label>\n";
-    print "            <select multiple=\"multiple\" id=\"id_" . $criterium["name"] . "\" name=\"" . $criterium["name"] . "\">\n";
+    print "              <select multiple=\"multiple\" id=\"id_" . $criterium["name"] . "\" name=\"" . $criterium["name"] . "\">\n";
     foreach ($criterium["values"] as $value) {
-      print "              <option value=\"" . $value . "\"";
+      print "                <option value=\"" . $value . "\"";
       if (strpos( "&" . $_SERVER["QUERY_STRING"] . "&", "&" . $criterium["name"] . "=" . $value . "&") !== false)
         print " selected=\"selected\"";
       print ">" . $value . "</option>\n";
     }
-    print "            </select>\n";
-    print "          </div>\n";
+    print "              </select>\n";
+    print "            </div>\n";
   }
 ?>
-          <div>
-            <label for="id_q" title="Enter keywords as desired">Keywords</label>
-            <input id="id_q" name="q" size="30" type="text" <?php
+            <div>
+              <label for="id_q" title="Enter keywords as desired">Keywords</label>
+              <input id="id_q" name="q" size="30" type="text" <?php
 if (isset($_GET["q"]))
   print "value=\"".$_GET["q"]."\"";
 ?>/>
-          </div>
-          <div>
-            <label for="id_bugs" title="Limit results based on bug-tracker status">Bugs</label><select id="id_bugs" name="bugs">
+            </div>
+            <div>
+              <label for="id_bugs" title="Limit results based on bug-tracker status">Bugs</label><select id="id_bugs" name="bugs">
 <?php
   $bugs_drop_down = array("All", "Bugs", "No Bugs");
   foreach ($bugs_drop_down as $label) {
-    print "              <option value=\"";
+    print "                <option value=\"";
     if ($label != "All")
       print $label;
     print "\"";
@@ -333,58 +333,58 @@ if (isset($_GET["q"]))
     print ">" . $label . "</option>\n";
   }
 ?>
-            </select>
-          </div>
-          <div>
-            <label>&nbsp;</label>
-            <input title="Search for packages using this criteria" type="submit" value="Search">
-          </div>
-        </fieldset>
-      </form>
-    </div>
+              </select>
+            </div>
+            <div>
+              <label>&nbsp;</label>
+              <input title="Search for packages using this criteria" type="submit" value="Search">
+            </div>
+          </fieldset>
+        </form>
+      </div>
 <?php
 
 if (count($exact_matches) > 0) {
 ?>
-    <div id="exact-matches" class="box">
-      <div class="pkglist-stats">
-        <p><?php print count($exact_matches); ?> exact match<?php if (count($exact_matches) != 1) print "es"; ?> found.</p>
-      </div>
-      <table class="results">
-        <thead>
-          <tr>
-            <th>Arch</th>
-            <th>Repo</th>
-            <th>Name</th>
-            <th>Version</th>
-            <th>Bugs</th>
-          </tr>
-        </thead>
-        <tbody>
+      <div id="exact-matches" class="box">
+        <div class="pkglist-stats">
+          <p><?php print count($exact_matches); ?> exact match<?php if (count($exact_matches) != 1) print "es"; ?> found.</p>
+        </div>
+        <table class="results">
+          <thead>
+            <tr>
+              <th>Arch</th>
+              <th>Repo</th>
+              <th>Name</th>
+              <th>Version</th>
+              <th>Bugs</th>
+            </tr>
+          </thead>
+          <tbody>
 <?php
   print_results($exact_matches);
 ?>
-        </tbody>
-      </table>
-    </div>
+          </tbody>
+        </table>
+      </div>
 <?php
 }
 
 ?>
-    <div id="pkglist-results" class="box">
+      <div id="pkglist-results" class="box">
 <?php
 
   header_and_footer();
 
 ?>
-      <table class="results">
-        <thead>
-          <tr>
+        <table class="results">
+          <thead>
+            <tr>
 <?php
 
   foreach ($sorts as $get => $sort) {
-    print "            <th>\n";
-    print "              <a href=\"/?";
+    print "              <th>\n";
+    print "                <a href=\"/?";
     print substr(str_replace(
       "&sort=".$_GET["sort"]."&",
       "&",
@@ -393,24 +393,25 @@ if (count($exact_matches) > 0) {
     if ($_GET["sort"] == $get)
       print "-";
     print $get."\" title=\"Sort package by ".$sort["title"]."\">".$sort["label"]."</a>\n";
-    print "            </th>\n";
+    print "              </th>\n";
   }
 ?>
-          </tr>
-        </thead>
-        <tbody>
+            </tr>
+          </thead>
+          <tbody>
 <?php
 
   print_results($fuzzy_matches);
 
-?>                
-        </tbody>
-      </table>
+?>
+          </tbody>
+        </table>
 <?php
 
   header_and_footer();
 
 ?>
+      </div>
       <div id="pkglist-about" class="box">
         <p>
           Can't find what you are looking for? Try searching again
