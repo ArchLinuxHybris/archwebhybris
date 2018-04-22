@@ -76,7 +76,8 @@
     "`binary_packages`.`pkgrel`,\".\"," .
     "`binary_packages`.`sub_pkgrel`) AS `version`," .
     "IF(`binary_packages`.`has_issues`,1,0) AS `has_issues`," .
-    "`build_assignments`.`return_date` AS `build_date`" .
+    "`build_assignments`.`return_date` AS `build_date`," .
+    "`binary_packages`.`last_moved` AS `move_date`" .
     $query
   );
   $exact_matches = array();
@@ -113,6 +114,11 @@
       "title" => "build date",
       "label" => "Build Date",
       "mysql" => "IFNULL(`build_assignments`.`return_date`,\"00-00-0000 00:00:00\")"
+    ),
+    "move_date" => array(
+      "title" => "last update",
+      "label" => "Last Update",
+      "mysql" => "IFNULL(`binary_packages`.`last_moved`,\"00-00-0000 00:00:00\")"
     )
   );
 
@@ -154,7 +160,8 @@
     "`binary_packages`.`pkgrel`,\".\"," .
     "`binary_packages`.`sub_pkgrel`) AS `version`," .
     "IF(`binary_packages`.`has_issues`,1,0) AS `has_issues`," .
-    "`build_assignments`.`return_date` AS `build_date`" .
+    "`build_assignments`.`return_date` AS `build_date`," .
+    "`binary_packages`.`last_moved` AS `move_date`" .
     $query .
     " LIMIT " . (($page-1)*100) . ", 100"
   );
@@ -191,6 +198,14 @@
       print "              ";
       if (isset($row["build_date"]))
         print $row["build_date"];
+      else
+        print "&nbsp;";
+      print "\n";
+      print "            </td>\n";
+      print "            <td>\n";
+      print "              ";
+      if (isset($row["move_date"]))
+        print $row["move_date"];
       else
         print "&nbsp;";
       print "\n";
