@@ -117,7 +117,7 @@
     ),
     "move_date" => array(
       "title" => "last update",
-      "label" => "Last Update",
+      "label" => "Last Updated",
       "mysql" => "IFNULL(`binary_packages`.`last_moved`,\"00-00-0000 00:00:00\")"
     )
   );
