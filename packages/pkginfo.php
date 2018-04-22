@@ -31,7 +31,8 @@
     "`architectures`.`name` AS `arch`," .
     "`git_repositories`.`name` AS `git_repo`," .
     "`package_sources`.`uses_upstream`," .
-    "`package_sources`.`uses_modification`" .
+    "`package_sources`.`uses_modification`," .
+    "`binary_packages`.`last_moved`" .
     " FROM `binary_packages`" .
     " JOIN `architectures` ON `binary_packages`.`architecture`=`architectures`.`id`" .
     " JOIN `repositories` ON `binary_packages`.`repository`=`repositories`.`id`" .
@@ -360,7 +361,7 @@ if (count($elsewhere)>0) {
           <meta itemprop="softwareVersion" content="<?php print $content["Version"]; ?>"/>
           <meta itemprop="fileSize" content="<?php print $content["Download Size"]; ?>"/>
           <meta itemprop="dateCreated" content="<?php print $content["Build Date"]; ?>"/>
-          <meta itemprop="datePublished" content="<?php print $content["Build Date"]; ?>"/>
+          <meta itemprop="datePublished" content="<?php print $content["last_moved"]; ?>"/>
           <meta itemprop="operatingSystem" content="Arch Linux 32"/>
           <table id="pkginfo">
             <tr>
@@ -431,6 +432,14 @@ if (count($elsewhere)>0) {
               </th>
               <td>
                 <?php print $content["Build Date"]."\n"; ?>
+              </td>
+            </tr>
+            <tr>
+              <th>
+                Last Updated:
+              </th>
+              <td>
+                <?php print $content["last_moved"]."\n"; ?>
               </td>
             </tr>
           </table>
