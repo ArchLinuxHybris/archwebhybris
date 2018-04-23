@@ -130,7 +130,7 @@
     ", ",
     array_diff(
       array_merge($dep_it,$js_dep),
-      array_intersect($dep_it,$js_dep)
+      $dep_it
     )
   );
 
@@ -140,6 +140,16 @@
       "mysql: " . implode(", ",$dep_it) . "<br>\n" .
       "json: " . implode(", ",$js_dep)
     );
+
+  foreach ($dependencies as $key => $dep) {
+    if ($dep["dependency_type"]!="run") {
+      $dependencies[$key]["json"]="not required";
+      continue;
+    }
+    foreach ($js_dep as $js)
+      if ($js == preg_replace("/[<=>].*$/","",$dep["install_target"]))
+        $dependencies[$key]["json"]=$js;
+  }
 
   // query dependent packages
 
@@ -453,6 +463,8 @@ if (count($elsewhere)>0) {
 <?php
   foreach ($dependencies as $dep) {
     print "              <li>\n";
+    if (!isset ($dep["json"]))
+      print "                (in database only)\n";
     if (count($dep["deps"]) == 0) {
       print "                <font color=\"#ff0000\">not satisfiable dependency: \"" . $dep["install_target"] . "\"</font>\n";
     } else {
