@@ -4,7 +4,8 @@
 
   $json_content = json_decode(
     file_get_contents(
-      "https://pkgapi.arch32.tyzoid.com/package/".$_GET["repo"].":".$_GET["pkgname"]
+      "https://pkgapi.arch32.tyzoid.com/package/" .
+        urlencode ($_GET["repo"].":".$_GET["pkgname"])
     ),
     true
   );
