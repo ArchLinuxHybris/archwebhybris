@@ -25,6 +25,7 @@ $result = mysql_run_query(
   "`package_sources`.`mod_git_revision`," .
   "`package_sources`.`uses_upstream`," .
   "`package_sources`.`uses_modification`," .
+  "`package_sources`.`commit_time`," .
   "`upstream_repositories`.`name` AS `package_repository`," .
   "`git_repositories`.`name` AS `git_repository`," .
   "`architectures`.`name` AS `arch`," .
@@ -133,6 +134,7 @@ if ($result -> num_rows > 0) {
     else
       $rows[$count]["mod_git_revision"] = $row["mod_git_revision"];
     $rows[$count]["package_repository"] = $row["package_repository"];
+    $rows[$count]["commit_time"] = $row["commit_time"];
     if ($row["is_blocked"]=="") {
       $rows[$count]["is_blocked"]="&nbsp;";
     }
@@ -190,6 +192,7 @@ if ($count > 0) {
   print "<th>git revision</th>";
   print "<th>modification git revision</th>";
   print "<th>package repository</th>";
+  print "<th>commit time</th>";
   print "<th>compilations</th>";
   print "<th>loops</th>";
   print "<th>build error</th>";
@@ -205,6 +208,7 @@ if ($count > 0) {
     print "<td><p style=\"font-size:8px\">".$row["git_revision"]."</p></td>";
     print "<td><p style=\"font-size:8px\">".$row["mod_git_revision"]."</p></td>";
     print "<td>".$row["package_repository"]."</td>";
+    print "<td>".$row["commit_time"]."</td>";
     print "<td>".$row["trials"]."</td>";
     print "<td>".$row["loops"]."</td>";
     print "<td>".$row["fail_reasons"]."</td>";
