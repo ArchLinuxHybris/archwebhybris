@@ -1,6 +1,7 @@
 <?php
 
 include "lib/mysql.php";
+include "lib/style.php";
 
 if (isset($_GET["show"]))
   $to_show=$_GET["show"];
@@ -104,6 +105,12 @@ if ($result -> num_rows > 0) {
       $rows[$count]["pkgbase_print"] = $rows[$count]["pkgbase"];
     else
       $rows[$count]["pkgbase_print"] = "(" . $rows[$count]["pkgbase"] . ")";
+    $rows[$count]["pkgbase_print"] =
+      "<a href=\"/buildmaster/dependencies.php?b=" .
+      $rows[$count]["pkgbase"] .
+      "&r=build-list\">" .
+      $rows[$count]["pkgbase_print"] .
+      "</a>";
     if ($row["uses_upstream"]) {
       $rows[$count]["git_revision"] =
         "<a href=\"https://git.archlinux.org/svntogit/" .
@@ -160,17 +167,23 @@ if ($result -> num_rows > 0) {
 
 }
 
-?>
-<html>
-<head>
-<?php
+$columns = array(
+  "package" => "pkgbase_print",
+  "git revision" => "git_revision",
+  "modification git revision" => "mod_git_revision",
+  "package repository" => "package_repository",
+  "commit time" => "commit_time",
+  "compilations" => "trials",
+  "loops" => "loops",
+  "build error" => "fail_reasons",
+  "blocked" => "is_blocked",
+  "handed out to" => "build_slave"
+);
 
-print "<title>List of " . $to_show . " package builds</title>\n";
-print "<link rel=\"stylesheet\" type=\"text/css\" href=\"/static/style.css\">\n";
-print "</head>\n";
-print "<body>\n";
+print_header("Build List");
+
 show_warning_on_offline_slave();
-print "<a href=\"https://buildmaster.archlinux32.org/\">Start page</a>\n";
+
 print "<a href=\"https://buildmaster.archlinux32.org/build-logs/\">build logs</a><br>\n";
 
 if ($count > 0) {
@@ -186,41 +199,54 @@ if ($count > 0) {
     }
   );
 
-  print "<table>\n";
-  print "<tr>";
-  print "<th>package</th>";
-  print "<th>git revision</th>";
-  print "<th>modification git revision</th>";
-  print "<th>package repository</th>";
-  print "<th>commit time</th>";
-  print "<th>compilations</th>";
-  print "<th>loops</th>";
-  print "<th>build error</th>";
-  print "<th>blocked</th>";
-  print "<th>handed out to</th>";
-  print "</tr>\n";
+?>
+      <div id="pkglist-results" class="box">
+        <table class="results">
+          <thead>
+            <tr>
+<?php
 
-  foreach($rows as $row) {
+foreach ($columns as $title => $content) {
 
-    print "<tr>";
+  print "            <th>\n";
+  print "              " . $title . "\n";
+  print "            </th>\n";
 
-    print "<td><a href=\"/buildmaster/dependencies.php?b=".$row["pkgbase"]."&r=build-list\">".$row["pkgbase_print"]."</a></td>";
-    print "<td><p style=\"font-size:8px\">".$row["git_revision"]."</p></td>";
-    print "<td><p style=\"font-size:8px\">".$row["mod_git_revision"]."</p></td>";
-    print "<td>".$row["package_repository"]."</td>";
-    print "<td>".$row["commit_time"]."</td>";
-    print "<td>".$row["trials"]."</td>";
-    print "<td>".$row["loops"]."</td>";
-    print "<td>".$row["fail_reasons"]."</td>";
-    print "<td>".$row["is_blocked"]."</td>";
-    print "<td>".$row["build_slave"]."</td>";
-
-    print "</tr>\n";
-  }
-
-  print "</table>\n";
 }
 
 ?>
-</body>
-</html>
+            </tr>
+          </thead>
+          <tbody>
+<?php
+
+$oddity = "odd";
+
+foreach($rows as $row) {
+
+  print "            <tr class=\"" . $oddity . "\">\n";
+
+  foreach ($columns as $title => $content) {
+
+    print "              <td>\n";
+    print "                " . $row[$content] . "\n";
+    print "              </td>\n";
+
+  }
+  print "            </tr>\n";
+
+  if ($oddity == "odd" )
+    $oddity = "even";
+  else
+    $oddity = "odd";
+
+}
+
+?>
+          </tbody>
+        </table>
+      </div>
+<?php
+}
+
+print_footer("Copyright © 2018 <a href=\"mailto:arch@eckner.net\" title=\"Contact Erich Eckner\">Erich Eckner</a>.");
