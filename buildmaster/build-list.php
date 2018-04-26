@@ -180,7 +180,7 @@ $columns = array(
   "handed out to" => "build_slave"
 );
 
-print_header("Build List");
+print_header("List of " . strtoupper(substr($to_show,0,1)) . substr($to_show,1) . " Package Builds");
 
 show_warning_on_offline_slave();
 
