@@ -33,11 +33,15 @@ function print_header($title) {
 <?php
 }
 
-function print_footer() {
+function print_footer($copyright = "Copyright © 2002-2018 <a href=\"mailto:jvinet@zeroflux.org\" title=\"Contact Judd Vinet\">Judd Vinet</a> and <a href=\"mailto:aaron@archlinux.org\" title=\"Contact Aaron Griffin\">Aaron Griffin</a>.") {
 ?>
       <div id="footer">
         <p>
-          Copyright © 2002-2018 <a href="mailto:jvinet@zeroflux.org" title="Contact Judd Vinet">Judd Vinet</a> and <a href="mailto:aaron@archlinux.org" title="Contact Aaron Griffin">Aaron Griffin</a>.
+<?php
+
+print "          " . $copyright . "\n";
+
+?>
         </p>
         <p>
           The Arch Linux name and logo are recognized <a href="https://wiki.archlinux.org/index.php/DeveloperWiki:TrademarkPolicy" title="Arch Linux Trademark Policy">trademarks</a>. Some rights reserved.
