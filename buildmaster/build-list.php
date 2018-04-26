@@ -8,13 +8,22 @@ if (isset($_GET["show"]))
 else
   $to_show="all";
 
-if ($to_show == "all")
-  $match = "";
-elseif ($to_show == "broken")
-  $match = " AND (`build_assignments`.`is_broken` OR `build_assignments`.`is_blocked` IS NOT NULL)";
-elseif ($to_show == "next")
-  $match = "";
-else
+$to_shows = array(
+  "all" => "",
+  "broken" => " AND (`build_assignments`.`is_broken` OR `build_assignments`.`is_blocked` IS NOT NULL)",
+  "next" => ""
+);
+
+$found = false;
+
+foreach ($to_shows as $candidate => $mc)
+  if ($to_show == $candidate) {
+    $match = $mc;
+    $found = true;
+    break;
+  }
+
+if (!$found)
   die_500("Unknown parameter for \"show\".");
 
 $result = mysql_run_query(
@@ -184,7 +193,17 @@ print_header("List of " . strtoupper(substr($to_show,0,1)) . substr($to_show,1) 
 
 show_warning_on_offline_slave();
 
-print "<a href=\"https://buildmaster.archlinux32.org/build-logs/\">build logs</a><br>\n";
+print "<a href=\"https://buildmaster.archlinux32.org/build-logs/\">build logs</a>\n";
+
+foreach ($to_shows as $link => $dummy) {
+  print "-\n";
+  if ($link != $to_show)
+    print "<a href=\"?show=" . $link . "\">";
+  print $link . " package builds";
+  if ($link != $to_show)
+    print "</a>";
+  print "\n";
+}
 
 if ($count > 0) {
 
