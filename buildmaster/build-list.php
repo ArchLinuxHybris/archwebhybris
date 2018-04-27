@@ -10,152 +10,263 @@ else
 
 $to_shows = array(
   "all" => "",
-  "broken" => " AND (`build_assignments`.`is_broken` OR `build_assignments`.`is_blocked` IS NOT NULL)",
-  "next" => ""
+  "broken" => " WHERE (`ba_q`.`is_broken` OR `ba_q`.`is_blocked` IS NOT NULL)",
+  "next" => " WHERE (`loops` IS NOT NULL OR `dependencies_pending` IS NULL)"
 );
 
-$found = false;
+$columns = array(
+  "deps" => array(
+    "label" => "Deps",
+    "mysql_name" => "dependencies_pending",
+    "mysql_query" => "IFNULL(`d_q`.`dependencies_pending`,0)",
+    "sort" => "deps",
+    "title" => "number of dependencies on the build-list"
+  ),
+  "pkgbase" => array(
+    "label" => "Package",
+    "mysql_name" => "pkgbase_print",
+    "mysql_query" =>
+      "CONCAT(" .
+        "\"<a href=\\\"/buildmaster/dependencies.php?b=\"," .
+        "`ba_q`.`pkgbase`," .
+        "\"&r=build-list\\\">\"," .
+        "`ba_q`.`pkgbase`," .
+        "\"</a>\"" .
+      ")",
+    "sort" => "pkgbase",
+    "title" => "package"
+  ),
+  "git_rev" => array(
+    "label" => "Git Revision",
+    "mysql_name" => "git_revision_print",
+    "mysql_query" =>
+      "IF(`ba_q`.`uses_upstream`," .
+        "CONCAT(" .
+          "\"<a href=\\\"https://git.archlinux.org/svntogit/\"," .
+          "`ba_q`.`git_repository`," .
+          "\".git/tree/\"," .
+          "`ba_q`.`pkgbase`," .
+          "\"/repos/\"," .
+          "`ba_q`.`package_repository`," .
+          "\"-\"," .
+          "IF(`ba_q`.`arch`=\"any\",\"any\",\"x86_64\")," .
+          "\"?id=\"," .
+          "`ba_q`.`git_revision`," .
+          "\"\\\">\"," .
+          "`ba_q`.`git_revision`," .
+          "\"</a>\"" .
+        ")," .
+        "`ba_q`.`git_revision`" .
+      ")",
+    "sort" => "git_rev",
+    "title" => "revision hash of upstream git repository"
+  ),
+  "mod_git_rev" => array(
+    "label" => "Modification Git Revision",
+    "mysql_name" => "mod_git_revision_print",
+    "mysql_query" =>
+      "IF(`ba_q`.`uses_modification`," .
+        "CONCAT(" .
+          "\"<a href=\\\"https://github.com/archlinux32/packages/tree/\"," .
+          "`ba_q`.`mod_git_revision`," .
+          "\"/\"," .
+          "`ba_q`.`package_repository`," .
+          "\"/\"," .
+          "`ba_q`.`pkgbase`," .
+          "\"\\\">\"," .
+          "`ba_q`.`mod_git_revision`," .
+          "\"</a>\"" .
+        ")," .
+        "`ba_q`.`mod_git_revision`" .
+      ")" ,
+    "sort" => "mod_git_rev",
+    "title" => "revision hash of modification git repository"
+  ),
+  "repo" => array(
+    "label" => "Repository",
+    "mysql_name" => "package_repository",
+    "mysql_query" => "`ba_q`.`package_repository`",
+    "sort" => "repo",
+    "title" => "package repository"
+  ),
+  "commit_time" => array(
+    "label" => "Commit Time",
+    "mysql_name" => "commit_time",
+    "mysql_query" => "`ba_q`.`commit_time`",
+    "sort" => "commit_time",
+    "title" => "commit time of the source"
+  ),
+  "trials" => array(
+    "label" => "Compilations",
+    "mysql_name" => "trials",
+    "mysql_query" => "IFNULL(`t_q`.`trials`,0)",
+    "sort" => "trials",
+    "title" => "number of compilations"
+  ),
+  "loops" => array(
+    "label" => "Loops",
+    "mysql_name" => "loops",
+    "mysql_query" => "IFNULL(`l_q`.`loops`,0)",
+    "sort" => "loops",
+    "title" => "number of loops"
+  ),
+  "failure" => array(
+    "label" => "Failures",
+    "mysql_name" => "fail_reasons",
+    "mysql_query" => "`fr_q`.`fail_reasons`",
+    "sort" => "failure",
+    "title" => "reason of build failure"
+  ),
+  "blocked" => array(
+    "label" => "Blocked",
+    "mysql_name" => "is_blocked",
+    "mysql_query" => "`ba_q`.`is_blocked`",
+    "sort" => "blocked",
+    "title" => "block reason"
+  ),
+  "build_slave" => array(
+    "label" => "Build Slave",
+    "mysql_name" => "build_slave",
+    "mysql_query" => "`bs_q`.`build_slave`",
+    "sort" => "build_slave",
+    "title" => "whom it is handed out to"
+  )
+);
 
-foreach ($to_shows as $candidate => $mc)
-  if ($to_show == $candidate) {
-    $match = $mc;
-    $found = true;
-    break;
-  }
+$match = $to_shows[$to_show];
+if (!isset($_GET["sort"]))
+  $_GET["sort"]="trials";
 
-if (!$found)
-  die_500("Unknown parameter for \"show\".");
+if (substr($_GET["sort"],0,1) == "-") {
+  $direction = " DESC";
+  $sort = substr($_GET["sort"],1);
+} else
+  $sort = $_GET["sort"];
+
+if (isset($columns[$sort]))
+  $order = "IFNULL(" . $columns[$sort]["mysql_name"] . ",0) " . $direction . ",";
+else
+  $order = "";
+
+function combine_fields($cln) {
+  return $cln["mysql_query"] . " AS `" . $cln["mysql_name"] . "`";
+}
 
 $result = mysql_run_query(
-  "SELECT DISTINCT " .
-  "`build_assignments`.`id`," .
-  "`build_assignments`.`is_blocked`," .
-  "`package_sources`.`pkgbase`," .
-  "`package_sources`.`git_revision`," .
-  "`package_sources`.`mod_git_revision`," .
-  "`package_sources`.`uses_upstream`," .
-  "`package_sources`.`uses_modification`," .
-  "`package_sources`.`commit_time`," .
-  "`upstream_repositories`.`name` AS `package_repository`," .
-  "`git_repositories`.`name` AS `git_repository`," .
-  "`architectures`.`name` AS `arch`," .
-  "EXISTS (SELECT 1 " .
-    "FROM `binary_packages` AS `broken_bin` " .
-    "JOIN `dependencies` ON `dependencies`.`dependent` = `broken_bin`.`id` " .
-    "JOIN `install_target_providers` ON `install_target_providers`.`install_target` = `dependencies`.`depending_on` " .
-    "JOIN `binary_packages` `to_be_built` ON `to_be_built`.`id` = `install_target_providers`.`package` " .
-    "JOIN `repositories` ON `to_be_built`.`repository` = `repositories`.`id` " .
-    "WHERE `broken_bin`.`build_assignment`=`build_assignments`.`id` ".
-    "AND `repositories`.`name`=\"build-list\" " .
-    "AND `to_be_built`.`build_assignment`!=`build_assignments`.`id`" .
-  ") AS `dependencies_pending`," .
-  "(SELECT count(1) " .
-    "FROM `build_dependency_loops` " .
-    "WHERE `build_dependency_loops`.`build_assignment`=`build_assignments`.`id`" .
-  ") AS `loops`, " .
-  "`build_slaves`.`name` AS `build_slave` " .
-  "FROM `build_assignments` " .
-  "JOIN `architectures` ON `build_assignments`.`architecture` = `architectures`.`id` " .
-  "JOIN `package_sources` ON `build_assignments`.`package_source` = `package_sources`.`id` " .
-  "JOIN `upstream_repositories` ON `package_sources`.`upstream_package_repository` = `upstream_repositories`.`id` " .
-  "JOIN `git_repositories` ON `upstream_repositories`.`git_repository`=`git_repositories`.`id` " .
-  "JOIN `binary_packages` ON `binary_packages`.`build_assignment` = `build_assignments`.`id` " .
-  "JOIN `repositories` ON `binary_packages`.`repository` = `repositories`.`id` " .
-  "LEFT JOIN `build_slaves` ON `build_slaves`.`currently_building`=`build_assignments`.`id` " .
-  "WHERE `repositories`.`name`=\"build-list\"" . $match
+  "SELECT " .
+  implode(",",array_map("combine_fields",$columns)) .
+  " FROM" .
+  " (" .
+    "SELECT DISTINCT " .
+    "`build_assignments`.`id`," .
+    "`build_assignments`.`is_blocked`," .
+    "`build_assignments`.`is_broken`," .
+    "`package_sources`.`pkgbase`," .
+    "`package_sources`.`git_revision`," .
+    "`package_sources`.`mod_git_revision`," .
+    "`package_sources`.`uses_upstream`," .
+    "`package_sources`.`uses_modification`," .
+    "`package_sources`.`commit_time`," .
+    "`upstream_repositories`.`name` AS `package_repository`," .
+    "`git_repositories`.`name` AS `git_repository`," .
+    "`architectures`.`name` AS `arch`" .
+    " FROM `build_assignments`" .
+    " JOIN `architectures` ON `build_assignments`.`architecture` = `architectures`.`id`" .
+    " JOIN `package_sources` ON `build_assignments`.`package_source` = `package_sources`.`id`" .
+    " JOIN `upstream_repositories` ON `package_sources`.`upstream_package_repository` = `upstream_repositories`.`id`" .
+    " JOIN `git_repositories` ON `upstream_repositories`.`git_repository`=`git_repositories`.`id`" .
+    " JOIN `binary_packages` ON `binary_packages`.`build_assignment` = `build_assignments`.`id`" .
+    " JOIN `repositories` ON `binary_packages`.`repository` = `repositories`.`id`" .
+    " WHERE `repositories`.`name`=\"build-list\"" .
+  ") AS `ba_q`".
+  " LEFT JOIN" .
+  " (" .
+    "SELECT " .
+    "`dependent_bp`.`build_assignment`," .
+    "COUNT(DISTINCT `dependency_bp`.`build_assignment`) AS `dependencies_pending`" .
+    " FROM `binary_packages` AS `dependent_bp`" .
+    " JOIN `dependencies` ON `dependencies`.`dependent` = `dependent_bp`.`id` " .
+    " JOIN `dependency_types` ON `dependencies`.`dependency_type` = `dependency_types`.`id`" .
+    " JOIN `install_target_providers` ON `install_target_providers`.`install_target` = `dependencies`.`depending_on` " .
+    " JOIN `binary_packages` AS `dependency_bp` ON `dependency_bp`.`id` = `install_target_providers`.`package` " .
+    " JOIN `repositories` ON `dependency_bp`.`repository` = `repositories`.`id` " .
+    " WHERE `dependency_bp`.`build_assignment` != `dependent_bp`.`build_assignment`" .
+    " AND `dependency_types`.`relevant_for_building`" .
+    " AND `repositories`.`name`=\"build-list\"" .
+    " GROUP BY `dependent_bp`.`build_assignment`" .
+  ") AS `d_q` ON `d_q`.`build_assignment`=`ba_q`.`id`" .
+  " LEFT JOIN" .
+  " (" .
+    "SELECT " .
+    "`build_dependency_loops`.`build_assignment`," .
+    "COUNT(1) AS `loops`" .
+    " FROM `build_dependency_loops`" .
+    " GROUP BY `build_dependency_loops`.`build_assignment`" .
+  ") AS `l_q` ON `l_q`.`build_assignment`=`ba_q`.`id`" .
+  " LEFT JOIN" .
+  " (" .
+    "SELECT " .
+    "`rfb`.`build_assignment`," .
+    "GROUP_CONCAT(" .
+      "CONCAT(" .
+        "\"<a href=\\\"https://buildmaster.archlinux32.org/build-logs/error/\"," .
+        "`rfb`.`log_file`," .
+        "\"\\\">\"," .
+        "`fail_reasons`.`name`," .
+        "\"</a>\"" .
+      ")" .
+      " ORDER BY `fail_reasons`.`name`" .
+    ") AS `fail_reasons`" .
+    " FROM (" .
+      "SELECT " .
+      "`failed_builds`.`build_assignment`," .
+      "`failed_builds`.`reason`," .
+      "MAX(`failed_builds`.`date`) AS `max_date`" .
+      " FROM `failed_builds`" .
+      " GROUP BY `failed_builds`.`build_assignment`,`failed_builds`.`reason`" .
+    ") AS `cfb`" .
+    " JOIN" .
+    " (" .
+      "SELECT DISTINCT " .
+      "`failed_builds`.*" .
+      " FROM `failed_builds`" .
+      " GROUP BY `failed_builds`.`build_assignment`,`failed_builds`.`reason`,`failed_builds`.`date`" .
+    ") AS `rfb`" .
+    " ON `cfb`.`build_assignment`=`rfb`.`build_assignment`" .
+    " AND `cfb`.`reason`=`rfb`.`reason`" .
+    " AND `cfb`.`max_date`=`rfb`.`date`" .
+    " JOIN `fail_reasons` ON `rfb`.`reason`=`fail_reasons`.`id`" .
+    " GROUP BY `rfb`.`build_assignment`" .
+  ") AS `fr_q` ON `fr_q`.`build_assignment`=`ba_q`.`id`" .
+  " LEFT JOIN" .
+  " (" .
+    "SELECT " .
+    "`failed_builds`.`build_assignment`," .
+    "COUNT(`failed_builds`.`id`) AS `trials`" .
+    " FROM `failed_builds`" .
+    " GROUP BY `failed_builds`.`build_assignment`" .
+  ") AS `t_q` ON `t_q`.`build_assignment`=`ba_q`.`id`" .
+  " LEFT JOIN" .
+  " (" .
+    "SELECT " .
+    "`build_slaves`.`currently_building`," .
+    "GROUP_CONCAT(`build_slaves`.`name`) AS `build_slave`" .
+    " FROM `build_slaves`" .
+    " GROUP BY `build_slaves`.`currently_building`" .
+  ") AS `bs_q` ON `bs_q`.`currently_building`=`ba_q`.`id`" .
+  $match .
+  " ORDER BY " . $order . "`trials` " . $direction . ",`dependencies_pending` " . $direction . ",`is_blocked` " . $direction . ",`pkgbase` " . $direction
 );
 
-if ($result -> num_rows > 0) {
+$count = 0;
 
-  $count = 0;
+while($row = $result->fetch_assoc()) {
 
-  while($row = $result->fetch_assoc()) {
-
-    if (($to_show == "next") &&
-      ($row["loops"]==0) &&
-      ($row["dependencies_pending"]==1))
-      continue;
-
-    $fail_result = mysql_run_query(
-      "SELECT " .
-      "`fail_reasons`.`name`, " .
-      "`failed_builds`.`log_file` " .
-      "FROM `failed_builds` " .
-      "JOIN `fail_reasons` ON `failed_builds`.`reason`=`fail_reasons`.`id` " .
-      "WHERE `failed_builds`.`build_assignment`=".$row["id"]." " .
-      "ORDER BY `failed_builds`.`date`"
-    );
-
-    unset($reasons);
-    $rows[$count]["trials"] = $fail_result -> num_rows;
-    if ($rows[$count]["trials"] > 0) {
-      while($fail_row = $fail_result->fetch_assoc()) {
-        $reasons[$fail_row["name"]] = $fail_row["log_file"];
-      }
-    }
-    if (isset($reasons)) {
-      $to_print="";
-      foreach ($reasons as $reason => $last_log) {
-        $to_print= $to_print .
-          ", <a href=\"https://buildmaster.archlinux32.org/build-logs/error/" .
-          $last_log .
-          "\">" .
-          $reason .
-          "</a>";
-      }
-      $rows[$count]["fail_reasons"]=substr($to_print,2);
-    } else {
-      $rows[$count]["fail_reasons"]="&nbsp;";
-    }
-
-    $rows[$count]["loops"] = $row["loops"];
-    $rows[$count]["pkgbase"] = $row["pkgbase"];
-    if ($row["dependencies_pending"]=="0")
-      $rows[$count]["pkgbase_print"] = $rows[$count]["pkgbase"];
-    else
-      $rows[$count]["pkgbase_print"] = "(" . $rows[$count]["pkgbase"] . ")";
-    $rows[$count]["pkgbase_print"] =
-      "<a href=\"/buildmaster/dependencies.php?b=" .
-      $rows[$count]["pkgbase"] .
-      "&r=build-list\">" .
-      $rows[$count]["pkgbase_print"] .
-      "</a>";
-    if ($row["uses_upstream"]) {
-      $rows[$count]["git_revision"] =
-        "<a href=\"https://git.archlinux.org/svntogit/" .
-        $row["git_repository"] . ".git/tree/" .
-        $row["pkgbase"] . "/repos/" .
-        $row["package_repository"] . "-";
-      if ($row["arch"]=="any")
-        $rows[$count]["git_revision"] =
-          $rows[$count]["git_revision"] . "any";
-      else
-        $rows[$count]["git_revision"] =
-          $rows[$count]["git_revision"] . "x86_64";
-      $rows[$count]["git_revision"] =
-        $rows[$count]["git_revision"] . "?id=" .
-        $row["git_revision"];
-      $rows[$count]["git_revision"] =
-        $rows[$count]["git_revision"] . "\">" .
-        $row["git_revision"] . "</a>";
-    } else
-      $rows[$count]["git_revision"] = $row["git_revision"];
-    if ($row["uses_modification"])
-      $rows[$count]["mod_git_revision"] =
-        "<a href=\"https://github.com/archlinux32/packages/tree/" .
-        $row["mod_git_revision"] . "/" .
-        $row["package_repository"] . "/" .
-        $row["pkgbase"] . "\">" .
-        $row["mod_git_revision"] . "</a>";
-    else
-      $rows[$count]["mod_git_revision"] = $row["mod_git_revision"];
-    $rows[$count]["package_repository"] = $row["package_repository"];
-    $rows[$count]["commit_time"] = $row["commit_time"];
-    if ($row["is_blocked"]=="") {
-      $rows[$count]["is_blocked"]="&nbsp;";
-    }
-    else {
-      $rows[$count]["is_blocked"] = preg_replace(
+  foreach ($row as $name => $value) {
+    if (!isset($row[$name]))
+      $rows[$count][$name] = "&nbsp;";
+    elseif ($name == "is_blocked")
+      $rows[$count][$name] = preg_replace(
         array (
           "/FS32#(\\d+)/",
           "/FS#(\\d+)/"
@@ -164,30 +275,14 @@ if ($result -> num_rows > 0) {
           "<a href=\"https://bugs.archlinux32.org/index.php?do=details&task_id=$1\">$0</a>",
           "<a href=\"https://bugs.archlinux.org/task/$1\">$0</a>"
         ),
-        $row["is_blocked"]
+        $value
       );
-    }
-    if (isset($row["build_slave"]))
-      $rows[$count]["build_slave"] = $row["build_slave"];
     else
-      $rows[$count]["build_slave"] = "&nbsp;";
-    $count++;
+      $rows[$count][$name] = $value;
   }
 
+  $count++;
 }
-
-$columns = array(
-  "package" => "pkgbase_print",
-  "git revision" => "git_revision",
-  "modification git revision" => "mod_git_revision",
-  "package repository" => "package_repository",
-  "commit time" => "commit_time",
-  "compilations" => "trials",
-  "loops" => "loops",
-  "build error" => "fail_reasons",
-  "blocked" => "is_blocked",
-  "handed out to" => "build_slave"
-);
 
 print_header("List of " . strtoupper(substr($to_show,0,1)) . substr($to_show,1) . " Package Builds");
 
@@ -207,17 +302,6 @@ foreach ($to_shows as $link => $dummy) {
 
 if ($count > 0) {
 
-  usort(
-    $rows,
-    function (array $a, array $b) {
-      if ($a["trials"] < $b["trials"])
-        return -1;
-      if ($a["trials"] > $b["trials"])
-        return 1;
-      return strcmp($a["pkgbase"],$b["pkgbase"]);
-    }
-  );
-
 ?>
       <div id="pkglist-results" class="box">
         <table class="results">
@@ -225,10 +309,16 @@ if ($count > 0) {
             <tr>
 <?php
 
-foreach ($columns as $title => $content) {
+foreach ($columns as $column) {
 
   print "            <th>\n";
-  print "              " . $title . "\n";
+  print "              <a href=\"?show=" . $to_show . "&sort=";
+  if ($column["sort"] == $_GET["sort"])
+    print "-";
+  print $column["sort"] . "\" ";
+  print "title=\"Sort build assignments by " . $column["title"] . "\">\n";
+  print "                " . $column["label"] . "\n";
+  print "              </a>\n";
   print "            </th>\n";
 
 }
@@ -245,10 +335,10 @@ foreach($rows as $row) {
 
   print "            <tr class=\"" . $oddity . "\">\n";
 
-  foreach ($columns as $title => $content) {
+  foreach ($columns as $column) {
 
     print "              <td>\n";
-    print "                " . $row[$content] . "\n";
+    print "                " . $row[$column["mysql_name"]] . "\n";
     print "              </td>\n";
 
   }
