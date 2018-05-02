@@ -31,6 +31,7 @@ function print_header($title) {
     </div>
     <div id="content">
 <?php
+  show_warning_on_offline_slave();
 }
 
 function print_footer($copyright = "Copyright © 2002-2018 <a href=\"mailto:jvinet@zeroflux.org\" title=\"Contact Judd Vinet\">Judd Vinet</a> and <a href=\"mailto:aaron@archlinux.org\" title=\"Contact Aaron Griffin\">Aaron Griffin</a>.") {

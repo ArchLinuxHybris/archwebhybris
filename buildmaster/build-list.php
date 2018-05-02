@@ -286,8 +286,6 @@ while($row = $result->fetch_assoc()) {
 
 print_header("List of " . strtoupper(substr($to_show,0,1)) . substr($to_show,1) . " Package Builds");
 
-show_warning_on_offline_slave();
-
 print "<a href=\"https://buildmaster.archlinux32.org/build-logs/\">build logs</a>\n";
 
 foreach ($to_shows as $link => $dummy) {
