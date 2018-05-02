@@ -451,25 +451,25 @@ if (count($elsewhere)>0) {
         (count($dep["deps"]) > 1) ||
         (array_values($dep["deps"])[0]["pkgname"] != $dep["install_target"])
       );
+      print "                ";
       if ($virtual_dep) {
-        print "                ";
         print $dep["install_target"];
-        print " <span class=\"virtual-dep\">(\n";
+        print " <span class=\"virtual-dep\">(";
       };
       $first = true;
       foreach ($dep["deps"] as $d_p) {
         if (!$first)
-          print ",\n";
+          print ", ";
         $first = false;
-        print "                <a href=\"/".$d_p["repo"]."/".$d_p["arch"]."/".$d_p["pkgname"]."/\" ";
+        print "<a href=\"/".$d_p["repo"]."/".$d_p["arch"]."/".$d_p["pkgname"]."/\" ";
         print "title=\"View package details for ".$d_p["pkgname"]."\">".$d_p["pkgname"]."</a>";
       }
       if ($virtual_dep)
-        print "\n                )</span>";
+        print ")</span>";
       print "\n";
     };
     if ($dep["dependency_type"]!="run")
-      print "                <span class=\"" . $dep["dependency_type"] . "-dep\"> (" . $dep["dependency_type"] . ")</span>\n";
+      print "                <span class=\"" . $dep["dependency_type"] . "-dep\">(" . $dep["dependency_type"] . ")</span>\n";
     print "              </li>\n";
   }
 ?>
@@ -483,9 +483,9 @@ if (count($elsewhere)>0) {
 <?php
   foreach ($dependent as $dep) {
     print "              <li>\n";
-    if ($dep["install_target"] != $content["Name"])
-      print "                ".$dep["install_target"] . " (\n";
     print "                ";
+    if ($dep["install_target"] != $content["Name"])
+      print $dep["install_target"] . " (";
     if ($dep["is_on_master_mirror"]=="1") {
       print "<a href=\"/".$dep["repo"]."/".$dep["arch"]."/".$dep["pkgname"]."/\" ";
       print "title=\"View package details for ".$dep["pkgname"]."\">";
@@ -495,11 +495,11 @@ if (count($elsewhere)>0) {
       print " [" . $dep["repo"] . "]";
     if ($dep["is_on_master_mirror"]=="1")
       print "</a>";
-    print "\n";
     if ($dep["install_target"] != $content["Name"])
-      print "                )\n";
+      print ")\n";
     if ($dep["dependency_type"] != "run")
-      print "                <span class=\"" . $dep["dependency_type"] . "-dep\"> (" . $dep["dependency_type"] . ")</span>\n";
+      print "                <span class=\"" . $dep["dependency_type"] . "-dep\">(" . $dep["dependency_type"] . ")</span>";
+    print "\n";
     print "              </li>\n";
   }
 ?>
