@@ -1,28 +1,49 @@
 <?php
 
-  include "lib/mysql.php";
+include "lib/mysql.php";
+include "lib/style.php";
 
-  $result = mysql_run_query(
-    "SELECT MAX(`package_sources`.`commit_time`) AS `last`" .
-    "FROM `package_sources`"
-  );
-
-?>
-<html>
-  <head>
-    <title>Build master status</title>
-    <link rel="stylesheet" type="text/css" href="/static/style.css">
-  </head>
-  <body>
-<?php show_warning_on_offline_slave(); ?>
-    <a href="https://buildmaster.archlinux32.org/">Start page</a><br>
-<?php
+$result = mysql_run_query(
+  "SELECT MAX(`package_sources`.`commit_time`) AS `last_commit`" .
+  " FROM `package_sources`"
+);
 
 if ($result -> num_rows > 0) {
-  $row = $result->fetch_assoc();
-  print "    latest package source is from " . $row["last"] . ".<br>\n";
+  $result = $result->fetch_assoc();
+  $last_commit = $result["last_commit"];
 }
 
-?>
-  </body>
-</html>
+$result = mysql_run_query(
+  "SELECT MAX(`build_assignments`.`return_date`) AS `last_return`" .
+  " FROM `build_assignments`"
+);
+
+if ($result -> num_rows > 0) {
+  $result = $result->fetch_assoc();
+  $last_return = $result["last_return"];
+}
+
+$result = mysql_run_query(
+  "SELECT MAX(`binary_packages`.`last_moved`) AS `last_moved`" .
+  " FROM `binary_packages`" .
+  " JOIN `build_assignments` ON `binary_packages`.`build_assignment`=`build_assignments`.`id`" .
+  " WHERE `binary_packages`.`last_moved`>`build_assignments`.`return_date`"
+);
+
+if ($result -> num_rows > 0) {
+  $result = $result->fetch_assoc();
+  $last_moved = $result["last_moved"];
+}
+
+print_header("Build Master Status");
+
+if (isset($last_commit))
+  print "      latest package source is from " . $last_commit . ".<br>\n";
+
+if (isset($last_return))
+  print "      latest built package is from " . $last_return . ".<br>\n";
+
+if (isset($last_return))
+  print "      latest package move was on " . $last_moved . ".<br>\n";
+
+print_footer("Copyright © 2018 <a href=\"mailto:arch@eckner.net\" title=\"Contact Erich Eckner\">Erich Eckner</a>.");
