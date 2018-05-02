@@ -1,5 +1,10 @@
 <?php
 
+if (function_exists(print_header))
+  return;
+
+include "lib/mysql.php";
+
 function print_header($title) {
 ?>
 <!DOCTYPE html>
