@@ -77,7 +77,8 @@
     "CONCAT(\"\\\"\",`install_target_providers`.`id`,\"\\\": \",\"{\\n\"," .
       "\"  \\\"repo\\\": \\\"\",`repositories`.`name`,\"\\\",\\n\"," .
       "\"  \\\"arch\\\": \\\"\",`architectures`.`name`,\"\\\",\\n\"," .
-      "\"  \\\"pkgname\\\": \\\"\",`binary_packages`.`pkgname`,\"\\\"\\n\"," .
+      "\"  \\\"pkgname\\\": \\\"\",`binary_packages`.`pkgname`,\"\\\",\\n\"," .
+      "\"  \\\"is_to_be_deleted\\\": \\\"\",IF(`binary_packages`.`is_to_be_deleted`,\"1\",\"0\"),\"\\\"\\n\"," .
       "\"}\"" .
     ")) AS `deps`," .
     "`install_targets`.`name` AS `install_target`" .
@@ -166,7 +167,8 @@
     "`repositories`.`name` AS `repo`," .
     "`repositories`.`is_on_master_mirror`," .
     "`architectures`.`name` AS `arch`," .
-    "`binary_packages`.`pkgname`" .
+    "`binary_packages`.`pkgname`," .
+    "IF(`binary_packages`.`is_to_be_deleted`,1,0) AS `is_to_be_deleted`" .
     " FROM `install_target_providers`" .
     " JOIN `install_targets` ON `install_targets`.`id`=`install_target_providers`.`install_target`" .
     " AND `install_targets`.`name` NOT IN (\"base\",\"base-devel\")" .
@@ -211,6 +213,7 @@
   $mysql_result = mysql_run_query(
     "SELECT " .
     "`binary_packages`.`pkgname` AS `pkgname`," .
+    "IF(`binary_packages`.`is_to_be_deleted`,1,0) AS `is_to_be_deleted`," .
     "`repositories`.`name` AS `repo`," .
     "`repositories`.`is_on_master_mirror`," .
     "`architectures`.`name` AS `arch`," .
@@ -333,7 +336,11 @@ if (count($elsewhere)>0) {
       print "                <a href=\"/" . $subst["repo"] . "/" . $subst["arch"] . "/" . $subst["pkgname"] ."/\"";
       print " title=\"Package details for " . $subst["pkgname"] ."\">";
     }
+    if ($subst["is_to_be_deleted"])
+      print "<s>";
     print $subst["pkgname"] . "-" . $subst["version"] . " [" . $subst["repo"] . "] (" . $subst["arch"] . ")";
+    if ($subst["is_to_be_deleted"])
+      print "</s>";
     if ($subst["is_on_master_mirror"])
       print "</a>\n";
     print "              </li>\n";
@@ -462,7 +469,13 @@ if (count($elsewhere)>0) {
           print ", ";
         $first = false;
         print "<a href=\"/".$d_p["repo"]."/".$d_p["arch"]."/".$d_p["pkgname"]."/\" ";
-        print "title=\"View package details for ".$d_p["pkgname"]."\">".$d_p["pkgname"]."</a>";
+        print "title=\"View package details for ".$d_p["pkgname"]."\">";
+        if ($d_p["is_to_be_deleted"])
+          print "<s>";
+        print $d_p["pkgname"];
+        if ($d_p["is_to_be_deleted"])
+          print "</s>";
+        print "</a>";
       }
       if ($virtual_dep)
         print ")</span>";
@@ -490,7 +503,11 @@ if (count($elsewhere)>0) {
       print "<a href=\"/".$dep["repo"]."/".$dep["arch"]."/".$dep["pkgname"]."/\" ";
       print "title=\"View package details for ".$dep["pkgname"]."\">";
     }
+    if ($dep["is_to_be_deleted"])
+      print "<s>";
     print $dep["pkgname"];
+    if ($dep["is_to_be_deleted"])
+      print "</s>";
     if ($dep["repo"] != $content["repo"])
       print " [" . $dep["repo"] . "]";
     if ($dep["is_on_master_mirror"]=="1")

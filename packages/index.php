@@ -3,7 +3,7 @@
   include "lib/mysql.php";
   include "lib/style.php";
 
-  foreach (array("bugs","sort") as $expected_param)
+  foreach (array("bugs","sort","del") as $expected_param)
     if (! isset($_GET[$expected_param]))
       $_GET[$expected_param] = "";
 
@@ -49,6 +49,11 @@
   if ($_GET["bugs"] == "No Bugs")
     $filter .= " AND NOT `binary_packages`.`has_issues`";
 
+  if ($_GET["del"] == "To Be Deleted")
+    $filter .= " AND `binary_packages`.`is_to_be_deleted`";
+  if ($_GET["del"] == "Not To Be Deleted")
+    $filter .= " AND NOT `binary_packages`.`is_to_be_deleted`";
+
   if (isset($_GET["q"])) {
     $exact_filter = " AND `binary_packages`.`pkgname` = from_base64(\"".base64_encode($_GET["q"])."\")";
     $fuzzy_filter = " AND `binary_packages`.`pkgname` LIKE from_base64(\"".base64_encode("%".$_GET["q"]."%")."\")";
@@ -78,7 +83,8 @@
     "`binary_packages`.`sub_pkgrel`) AS `version`," .
     "IF(`binary_packages`.`has_issues`,1,0) AS `has_issues`," .
     "`build_assignments`.`return_date` AS `build_date`," .
-    "`binary_packages`.`last_moved` AS `move_date`" .
+    "`binary_packages`.`last_moved` AS `move_date`," .
+    "IF(`binary_packages`.`is_to_be_deleted`,1,0) AS `is_to_be_deleted`" .
     $query
   );
   $exact_matches = array();
@@ -120,6 +126,11 @@
       "title" => "last update",
       "label" => "Last Updated",
       "mysql" => "IFNULL(`binary_packages`.`last_moved`,\"00-00-0000 00:00:00\")"
+    ),
+    "del" => array(
+      "title" => "to be deleted",
+      "label" => "Delete",
+      "mysql" => "`binary_packages`.`is_to_be_deleted`"
     )
   );
 
@@ -162,7 +173,8 @@
     "`binary_packages`.`sub_pkgrel`) AS `version`," .
     "IF(`binary_packages`.`has_issues`,1,0) AS `has_issues`," .
     "`build_assignments`.`return_date` AS `build_date`," .
-    "`binary_packages`.`last_moved` AS `move_date`" .
+    "`binary_packages`.`last_moved` AS `move_date`," .
+    "IF(`binary_packages`.`is_to_be_deleted`,1,0) AS `is_to_be_deleted`" .
     $query .
     " LIMIT " . (($page-1)*100) . ", 100"
   );
@@ -207,6 +219,14 @@
       print "              ";
       if (isset($row["move_date"]))
         print $row["move_date"];
+      else
+        print "&nbsp;";
+      print "\n";
+      print "            </td>\n";
+      print "            <td>\n";
+      print "              ";
+      if ($row["is_to_be_deleted"])
+        print "to be deleted";
       else
         print "&nbsp;";
       print "\n";
@@ -320,6 +340,22 @@ if (isset($_GET["q"]))
       print $label;
     print "\"";
     if ($_GET["bugs"]==$label)
+      print " selected=\"selected\"";
+    print ">" . $label . "</option>\n";
+  }
+?>
+              </select>
+            </div>
+            <div>
+              <label for="id_del" title="Limit results based on to-be-deleted flag">Delete</label><select id="id_del" name="del">
+<?php
+  $del_drop_down = array("All", "To Be Deleted", "Not To Be Deleted");
+  foreach ($del_drop_down as $label) {
+    print "                <option value=\"";
+    if ($label != "All")
+      print $label;
+    print "\"";
+    if ($_GET["del"]==$label)
       print " selected=\"selected\"";
     print ">" . $label . "</option>\n";
   }
