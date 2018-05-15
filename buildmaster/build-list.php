@@ -15,6 +15,13 @@ $to_shows = array(
 );
 
 $columns = array(
+  "priority" => array(
+    "label" => "Priority",
+    "mysql_name" => "priority",
+    "mysql_query" => "`ba_q`.`priority`",
+    "sort" => "priority",
+    "title" => "priority"
+  ),
   "deps" => array(
     "label" => "Deps",
     "mysql_name" => "dependencies_pending",
@@ -161,6 +168,7 @@ $result = mysql_run_query(
     "`build_assignments`.`id`," .
     "`build_assignments`.`is_blocked`," .
     "`build_assignments`.`is_broken`," .
+    "`build_assignments`.`priority`," .
     "`package_sources`.`pkgbase`," .
     "`package_sources`.`git_revision`," .
     "`package_sources`.`mod_git_revision`," .
