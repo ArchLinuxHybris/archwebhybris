@@ -45,7 +45,11 @@
       " WHERE `install_target_providers`.`install_target` = `dependencies`.`depending_on`" .
     ")" .
     $ignore .
-    " ORDER BY `is_to_be_deleted`,`binary_packages`.`pkgname`,`install_targets`.`name`"
+    " ORDER BY " .
+    "`binary_packages`.`is_to_be_deleted`," .
+    "`repositories`.`name`," .
+    "`binary_packages`.`pkgname`," .
+    "`install_targets`.`name`"
   );
 
   $serious_issues = array();
