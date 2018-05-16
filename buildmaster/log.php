@@ -2,6 +2,7 @@
 
   include "lib/mysql.php";
 
+  $filter = "";
   if (isset($_GET["show"]) &&
     ($_GET["show"] == "ssh")) {
     $to_show = "ssh";
@@ -12,6 +13,8 @@
       "parameters" => "`ssh_log`.`parameters`"
     );
     $join = " LEFT JOIN `build_slaves` ON `ssh_log`.`build_slave`=`build_slaves`.`id`";
+    if (isset($_GET["filter"]))
+      $filter = " AND `ssh_log`.`action` LIKE from_base64(\"" . base64_encode($_GET["filter"]) . "\")";
   } else {
     $to_show = "email";
     $columns = array(
@@ -46,6 +49,7 @@
   // NOW() is wrong here - due to differing time zones O.o
       "SELECT MAX(`l`.`date`) FROM `" . $to_show . "_log` AS `l`" .
     "),`" . $to_show . "_log`.`date`) < from_base64(\"" . base64_encode( $min_time ) . "\")" .
+    $filter .
     " ORDER BY `" . $to_show . "_log`.`date` DESC";
 
   $result = mysql_run_query($query);
