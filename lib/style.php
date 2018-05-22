@@ -1,6 +1,6 @@
 <?php
 
-if (function_exists(print_header))
+if (function_exists("print_header"))
   return;
 
 include "lib/mysql.php";
