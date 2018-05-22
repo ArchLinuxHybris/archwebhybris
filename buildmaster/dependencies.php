@@ -71,8 +71,8 @@ mysql_run_query(
   " LIMIT " . $limit
 );
 
-unset($knots);
-unset($edges);
+$edges = "";
+$knots = "";
 
 $result = mysql_run_query(
   "SELECT DISTINCT `install_target_providers`.`install_target`,`install_target_providers`.`package`" .
