@@ -18,7 +18,9 @@
     <a href="/buildmaster/mysql-issues.php">broken dependencies in the database</a><br>
     <a href="/buildmaster/todos.php">todos</a>
     as <a href="/buildmaster/todos.php?graph">graph</a><br>
-    <a href="/buildmaster/blacklist.php">blacklisted packages</a><br>
+    <a href="/buildmaster/blacklist.php">blacklisted packages</a>,
+    <a href="/buildmaster/to-delete.php">packages to be deleted</a>
+    and <a href="/buildmaster/deletion-links.php">links between them</a><br>
     <img src="/buildmaster/statistics.php?log"><br>
   </body>
 </html>
