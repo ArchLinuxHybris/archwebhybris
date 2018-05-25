@@ -12,6 +12,7 @@
     "MAX(IF(`ssh_log`.`action`=\"get-assignment\",`ssh_log`.`date`,NULL)" .
     ") AS `bs`," .
     "`build_slaves`.`logged_lines`," .
+    "`build_slaves`.`trials`," .
     "`build_slaves`.`last_action`" .
     " FROM `build_slaves`" .
     " LEFT JOIN `ssh_log` ON" .
@@ -39,7 +40,7 @@ show_warning_on_offline_slave();
 
   print "<table border=1>\n";
   if ($result->num_rows > 0) {
-    print "<tr><th>name</th><th>operator</th><th>currently building</th><th>last connection</th><th>building since</th><th>logged lines</th><th>last action</th></tr>\n";
+    print "<tr><th>name</th><th>operator</th><th>currently building</th><th>last connection</th><th>building since</th><th>trials</th><th>logged lines</th><th>last action</th></tr>\n";
     while ($row = $result -> fetch_assoc()) {
       foreach ($row as $key => $value) {
         if ($value=="") {
@@ -52,6 +53,7 @@ show_warning_on_offline_slave();
       print "<td>".$row["pkgbase"]."</td>";
       print "<td>".$row["lc"]."</td>";
       print "<td>".$row["bs"]."</td>";
+      print "<td>".$row["trials"]."</td>";
       print "<td>".$row["logged_lines"]."</td>";
       print "<td>".$row["last_action"]."</td>";
       print "</tr>\n";
