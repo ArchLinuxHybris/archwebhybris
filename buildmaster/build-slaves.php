@@ -47,7 +47,7 @@ show_warning_on_offline_slave();
         }
       }
       print "<tr>";
-      print "<td>".$row["name"]."</td>";
+      print "<td><a href=\"/buildmaster/log.php?show=ssh&slave=".$row["name"]."\">".$row["name"]."</a></td>";
       print "<td>".$row["operator"]."</td>";
       print "<td>".$row["pkgbase"]."</td>";
       print "<td>".$row["lc"]."</td>";
