@@ -13,8 +13,10 @@
       "parameters" => "`ssh_log`.`parameters`"
     );
     $join = " LEFT JOIN `build_slaves` ON `ssh_log`.`build_slave`=`build_slaves`.`id`";
-    if (isset($_GET["filter"]))
-      $filter = " AND `ssh_log`.`action` LIKE from_base64(\"" . base64_encode($_GET["filter"]) . "\")";
+    if (isset($_GET["action"]))
+      $filter .= " AND `ssh_log`.`action` LIKE from_base64(\"" . base64_encode($_GET["action"]) . "\")";
+    if (isset($_GET["slave"]))
+      $filter .= " AND `build_slaves`.`name` LIKE from_base64(\"" . base64_encode($_GET["slave"]) . "\")";
   } else {
     $to_show = "email";
     $columns = array(
