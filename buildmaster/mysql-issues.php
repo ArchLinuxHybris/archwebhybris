@@ -21,7 +21,8 @@
     "`subst_r`.`name` AS `subst_repository`," .
     "`subst_buildlist_bp`.`id` AS `subst_buildlist`" .
     " FROM `binary_packages`" .
-    " JOIN `repositories` ON `binary_packages`.`repository`=`repositories`.`id`" .
+    " JOIN `binary_packages_in_repositories` ON `binary_packages`.`id`=`binary_packages_in_repositories`.`package`" .
+    " JOIN `repositories` ON `binary_packages_in_repositories`.`repository`=`repositories`.`id`" .
     " AND `repositories`.`is_on_master_mirror`" .
     " JOIN `dependencies` ON `dependencies`.`dependent`=`binary_packages`.`id`" .
     " JOIN `dependency_types` ON `dependencies`.`dependency_type`=`dependency_types`.`id`" .
@@ -29,15 +30,16 @@
     " JOIN `install_targets` ON `dependencies`.`depending_on`=`install_targets`.`id`" .
     " JOIN `architectures` ON `binary_packages`.`architecture`=`architectures`.`id`" .
     " LEFT JOIN (`binary_packages` AS `subst_bp`" .
-    " JOIN `repositories` AS `subst_r` ON `subst_bp`.`repository`=`subst_r`.`id`" .
+    " JOIN `binary_packages_in_repositories` as `subst_bpir` ON `subst_bp`.`id`=`subst_bpir`.`package`" .
+    " JOIN `repositories` AS `subst_r` ON `subst_bpir`.`repository`=`subst_r`.`id`" .
     " JOIN `repository_stability_relations` ON `repository_stability_relations`.`less_stable`=`subst_r`.`id`" .
     ")" .
     " ON `subst_bp`.`pkgname`=`binary_packages`.`pkgname`" .
     " AND `subst_bp`.`id`!=`binary_packages`.`id`" .
     " AND `repository_stability_relations`.`more_stable`=`repositories`.`id`" .
     " LEFT JOIN (`binary_packages` AS `subst_buildlist_bp`" .
-    " JOIN `repositories` AS `subst_buildlist_r`" .
-    " ON `subst_buildlist_bp`.`repository`=`subst_buildlist_r`.`id`" .
+    " JOIN `binary_packages_in_repositories` AS `subst_buildlist_bpir` ON `subst_buildlist_bp`.`id`=`subst_buildlist_bpir`.`package`" .
+    " JOIN `repositories` AS `subst_buildlist_r` ON `subst_buildlist_bpir`.`repository`=`subst_buildlist_r`.`id`" .
     " AND `subst_buildlist_r`.`name`=\"build-list\"".
     ") ON `subst_buildlist_bp`.`pkgname`=`binary_packages`.`pkgname`" .
     " WHERE NOT EXISTS (" .
@@ -69,7 +71,8 @@
     "`repository_stabilities`.`name` AS `stability`," .
     "IF(`binary_packages`.`is_to_be_deleted`,1,0) AS `is_to_be_deleted`" .
     " FROM `binary_packages`" .
-    " JOIN `repositories` ON `binary_packages`.`repository`=`repositories`.`id`" .
+    " JOIN `binary_packages_in_repositories` ON `binary_packages`.`id`=`binary_packages_in_repositories`.`package`" .
+    " JOIN `repositories` ON `binary_packages_in_repositories`.`repository`=`repositories`.`id`" .
     " AND `repositories`.`is_on_master_mirror`" .
     " JOIN `repository_stabilities` ON `repositories`.`stability`=`repository_stabilities`.`id`" .
     " JOIN `dependencies` ON `dependencies`.`dependent`=`binary_packages`.`id`" .
@@ -84,7 +87,8 @@
     " AND NOT EXISTS (" .
       "SELECT * FROM `install_target_providers`" .
       " JOIN `binary_packages` AS `prov_bp` ON `prov_bp`.`id`=`install_target_providers`.`package`" .
-      " JOIN `repositories` AS `prov_r` ON `prov_bp`.`repository`=`prov_r`.`id`" .
+      " JOIN `binary_packages_in_repositories` AS `prov_bpir` ON `prov_bp`.`id`=`prov_bpir`.`package`" .
+      " JOIN `repositories` AS `prov_r` ON `prov_bpir`.`repository`=`prov_r`.`id`" .
       " JOIN `repository_stability_relations` ON `prov_r`.`stability`=`repository_stability_relations`.`more_stable`" .
       " WHERE `install_target_providers`.`install_target` = `dependencies`.`depending_on`" .
       " AND `repositories`.`stability`=`repository_stability_relations`.`less_stable`" .

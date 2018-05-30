@@ -184,7 +184,8 @@ $result = mysql_run_query(
     " JOIN `upstream_repositories` ON `package_sources`.`upstream_package_repository` = `upstream_repositories`.`id`" .
     " JOIN `git_repositories` ON `upstream_repositories`.`git_repository`=`git_repositories`.`id`" .
     " JOIN `binary_packages` ON `binary_packages`.`build_assignment` = `build_assignments`.`id`" .
-    " JOIN `repositories` ON `binary_packages`.`repository` = `repositories`.`id`" .
+    " JOIN `binary_packages_in_repositories` ON `binary_packages`.`id` = `binary_packages_in_repositories`.`package`" .
+    " JOIN `repositories` ON `binary_packages_in_repositories`.`repository` = `repositories`.`id`" .
     " WHERE `repositories`.`name`=\"build-list\"" .
   ") AS `ba_q`".
   " LEFT JOIN" .
@@ -197,7 +198,8 @@ $result = mysql_run_query(
     " JOIN `dependency_types` ON `dependencies`.`dependency_type` = `dependency_types`.`id`" .
     " JOIN `install_target_providers` ON `install_target_providers`.`install_target` = `dependencies`.`depending_on` " .
     " JOIN `binary_packages` AS `dependency_bp` ON `dependency_bp`.`id` = `install_target_providers`.`package` " .
-    " JOIN `repositories` ON `dependency_bp`.`repository` = `repositories`.`id` " .
+    " JOIN `binary_packages_in_repositories` ON `dependency_bp`.`id` = `binary_packages_in_repositories`.`package` " .
+    " JOIN `repositories` ON `binary_packages_in_repositories`.`repository` = `repositories`.`id` " .
     " WHERE `dependency_bp`.`build_assignment` != `dependent_bp`.`build_assignment`" .
     " AND `dependency_types`.`relevant_for_building`" .
     " AND `repositories`.`name`=\"build-list\"" .

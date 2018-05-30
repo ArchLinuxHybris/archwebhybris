@@ -13,9 +13,10 @@
     "`architectures`.`name` AS `arch` " .
     "FROM `binary_packages` " .
     "JOIN `architectures` ON `binary_packages`.`architecture`=`architectures`.`id` " .
-    "JOIN `repositories` ON `binary_packages`.`repository`=`repositories`.`id` " .
+    " JOIN `binary_packages_in_repositories` ON `binary_packages`.`id`=`binary_packages_in_repositories`.`package`" .
+    " JOIN `repositories` ON `binary_packages_in_repositories`.`repository`=`repositories`.`id`" .
     "WHERE `binary_packages`.`is_to_be_deleted` " .
-    "AND NOT `repositories`.`name` IN (\"build-support\",\"build-list\",\"deletion-list\")"
+    "AND `repositories`.`is_on_master_mirror`"
   );
 
 ?>

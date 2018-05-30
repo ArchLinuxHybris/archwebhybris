@@ -37,7 +37,8 @@
     "`binary_packages`.`last_moved`" .
     " FROM `binary_packages`" .
     " JOIN `architectures` ON `binary_packages`.`architecture`=`architectures`.`id`" .
-    " JOIN `repositories` ON `binary_packages`.`repository`=`repositories`.`id`" .
+    " JOIN `binary_packages_in_repositories` ON `binary_packages`.`id`=`binary_packages_in_repositories`.`package`" .
+    " JOIN `repositories` ON `binary_packages_in_repositories`.`repository`=`repositories`.`id`" .
     " JOIN `repository_stabilities` ON `repositories`.`stability`=`repository_stabilities`.`id`" .
     " JOIN `build_assignments` ON `binary_packages`.`build_assignment`=`build_assignments`.`id`" .
     " JOIN `package_sources` ON `build_assignments`.`package_source`=`package_sources`.`id`" .
@@ -90,14 +91,16 @@
       "`install_target_providers`" .
       " JOIN `binary_packages` ON `install_target_providers`.`package`=`binary_packages`.`id`" .
       " JOIN `architectures` ON `binary_packages`.`architecture`=`architectures`.`id`" .
-      " JOIN `repositories` ON `binary_packages`.`repository`=`repositories`.`id`" .
+      " JOIN `binary_packages_in_repositories` ON `binary_packages`.`id`=`binary_packages_in_repositories`.`package`" .
+      " JOIN `repositories` ON `binary_packages_in_repositories`.`repository`=`repositories`.`id`" .
       " JOIN `repository_stability_relations` ON `repository_stability_relations`.`more_stable`=`repositories`.`stability`" .
       " AND `repository_stability_relations`.`less_stable`=" . $mysql_content["repo_stability"] .
     ") ON `install_target_providers`.`install_target`=`dependencies`.`depending_on`" .
     " WHERE `dependencies`.`dependent`=" . $mysql_content["id"] .
     " AND NOT EXISTS (" .
       "SELECT 1 FROM `binary_packages` AS `subst_bp`" .
-      " JOIN `repositories` AS `subst_r` ON `subst_bp`.`repository`=`subst_r`.`id`" .
+      " JOIN `binary_packages_in_repositories` AS `subst_bpir` ON `subst_bp`.`id`=`subst_bpir`.`package`" .
+      " JOIN `repositories` AS `subst_r` ON `subst_bpir`.`repository`=`subst_r`.`id`" .
   // the substitue must be truly less stable than the dependency
       " JOIN `repository_stability_relations` AS `subst_rsr` ON `subst_rsr`.`less_stable`=`subst_r`.`stability`" .
       " AND `subst_rsr`.`less_stable`!=`subst_rsr`.`more_stable`" .
@@ -176,13 +179,15 @@
     " JOIN `dependency_types` ON `dependency_types`.`id`=`dependencies`.`dependency_type`" .
     " JOIN `binary_packages` ON `dependencies`.`dependent`=`binary_packages`.`id`" .
     " JOIN `architectures` ON `binary_packages`.`architecture`=`architectures`.`id`" .
-    " JOIN `repositories` ON `binary_packages`.`repository`=`repositories`.`id`" .
+    " JOIN `binary_packages_in_repositories` ON `binary_packages`.`id`=`binary_packages_in_repositories`.`package`" .
+    " JOIN `repositories` ON `binary_packages_in_repositories`.`repository`=`repositories`.`id`" .
     " JOIN `repository_stability_relations` ON `repository_stability_relations`.`less_stable`=`repositories`.`stability`" .
     " AND `repository_stability_relations`.`more_stable`=" . $mysql_content["repo_stability"] .
     " WHERE `install_target_providers`.`package`=" . $mysql_content["id"] .
     " AND NOT EXISTS (" .
       "SELECT 1 FROM `binary_packages` AS `subst_bp`" .
-      " JOIN `repositories` AS `subst_r` ON `subst_bp`.`repository`=`subst_r`.`id`" .
+      " JOIN `binary_packages_in_repositories` AS `subst_bpir` ON `subst_bp`.`id`=`subst_bpir`.`package`" .
+      " JOIN `repositories` AS `subst_r` ON `subst_bpir`.`repository`=`subst_r`.`id`" .
   // the substitue must be truly less stable than we
       " JOIN `repository_stability_relations` AS `subst_rsr` ON `subst_rsr`.`less_stable`=`subst_r`.`stability`" .
       " AND `subst_rsr`.`less_stable`!=`subst_rsr`.`more_stable`" .
@@ -225,7 +230,8 @@
     ") AS `version`" .
     " FROM `binary_packages` " .
     " JOIN `architectures` ON `binary_packages`.`architecture`=`architectures`.`id`" .
-    " JOIN `repositories` ON `binary_packages`.`repository`=`repositories`.`id`" .
+    " JOIN `binary_packages_in_repositories` ON `binary_packages`.`id`=`binary_packages_in_repositories`.`package`" .
+    " JOIN `repositories` ON `binary_packages_in_repositories`.`repository`=`repositories`.`id`" .
     " JOIN `binary_packages` AS `original`" .
     " ON `binary_packages`.`pkgname`=`original`.`pkgname`" .
     " AND `binary_packages`.`id`!=`original`.`id`" .

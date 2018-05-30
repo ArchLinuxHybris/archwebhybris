@@ -64,7 +64,8 @@
 
   $query = " FROM `binary_packages`" .
     " JOIN `architectures` ON `architectures`.`id`=`binary_packages`.`architecture`" .
-    " JOIN `repositories` ON `repositories`.`id`=`binary_packages`.`repository`" .
+    " JOIN `binary_packages_in_repositories` ON `binary_packages`.`id`=`binary_packages_in_repositories`.`package`" .
+    " JOIN `repositories` ON `binary_packages_in_repositories`.`repository`=`repositories`.`id`" .
     " AND `repositories`.`is_on_master_mirror`" .
     " JOIN `build_assignments` ON `build_assignments`.`id`=`binary_packages`.`build_assignment`" .
     $filter . $exact_filter .
@@ -136,7 +137,8 @@
 
   $query = " FROM `binary_packages`" .
     " JOIN `architectures` ON `architectures`.`id`=`binary_packages`.`architecture`" .
-    " JOIN `repositories` ON `repositories`.`id`=`binary_packages`.`repository`" .
+    " JOIN `binary_packages_in_repositories` ON `binary_packages`.`id`=`binary_packages_in_repositories`.`package`" .
+    " JOIN `repositories` ON `binary_packages_in_repositories`.`repository`=`repositories`.`id`" .
     " AND `repositories`.`is_on_master_mirror`" .
     " JOIN `build_assignments` ON `build_assignments`.`id`=`binary_packages`.`build_assignment`" .
     $filter . $fuzzy_filter .

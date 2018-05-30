@@ -61,7 +61,8 @@ $result = mysql_run_query(
   " FROM `binary_packages`" .
   " JOIN `d_bp` ON `d_bp`.`id`=`binary_packages`.`id`" .
   " JOIN `build_assignments` ON `binary_packages`.`build_assignment`=`build_assignments`.`id`" .
-  " JOIN `repositories` ON `binary_packages`.`repository`=`repositories`.`id`"
+  " JOIN `binary_packages_in_repositories` ON `binary_packages`.`id`=`bianry_packages_in_repositories`.`package`"
+  " JOIN `repositories` ON `binary_packages_in_repositories`.`repository`=`repositories`.`id`"
 );
 
 while ($row = $result->fetch_assoc())

@@ -37,7 +37,8 @@ mysql_run_query(
   "INSERT IGNORE INTO `cons` (`dep`,`itp`)" .
   " SELECT `dependencies`.`id`,`install_target_providers`.`id`".
   " FROM `binary_packages`" .
-  " JOIN `repositories` ON `binary_packages`.`repository`=`repositories`.`id`" .
+  " JOIN `binary_packages_in_repositories` ON `binary_packages`.`id`=`binary_packages_in_repositories`.`package`" .
+  " JOIN `repositories` ON `binary_packages_in_repositories`.`repository`=`repositories`.`id`" .
   " JOIN `repository_stabilities` ON `repositories`.`stability`=`repository_stabilities`.`id`" .
   " JOIN `architectures` ON `binary_packages`.`architecture`=`architectures`.`id`" .
   " JOIN `build_assignments` ON `binary_packages`.`build_assignment`= `build_assignments`.`id`" .
@@ -56,7 +57,8 @@ mysql_run_query(
   "INSERT IGNORE INTO `cons` (`dep`,`itp`)" .
   " SELECT `dependencies`.`id`,`install_target_providers`.`id`".
   " FROM `binary_packages`" .
-  " JOIN `repositories` ON `binary_packages`.`repository`=`repositories`.`id`" .
+  " JOIN `binary_packages_in_repositories` ON `binary_packages`.`id`=`binary_packages_in_repositories`.`package`" .
+  " JOIN `repositories` ON `binary_packages_in_repositories`.`repository`=`repositories`.`id`" .
   " JOIN `architectures` ON `binary_packages`.`architecture`=`architectures`.`id`" .
   " JOIN `build_assignments` ON `binary_packages`.`build_assignment`= `build_assignments`.`id`" .
   " JOIN `package_sources` ON `build_assignments`.`package_source`= `package_sources`.`id`" .
@@ -64,7 +66,8 @@ mysql_run_query(
   " JOIN `install_target_providers` ON `install_target_providers`.`package`=`binary_packages`.`id`" .
   " JOIN `dependencies` ON `install_target_providers`.`install_target`=`dependencies`.`depending_on`" .
   " JOIN `binary_packages` AS `d_bp` ON `dependencies`.`dependent`=`d_bp`.`id`" .
-  " JOIN `repositories` AS `d_r` ON `d_bp`.`repository`=`d_r`.`id`" .
+  " JOIN `binary_packages_in_repositories` as `d_bpir` ON `d_bp`.`id`=`d_bpir`.`package`" .
+  " JOIN `repositories` AS `d_r` ON `d_bpir`.`repository`=`d_r`.`id`" .
   " JOIN `repository_stabilities` AS `d_rs` ON `d_r`.`stability`=`d_rs`.`id`" .
   " JOIN `dependency_types` ON `dependencies`.`dependency_type`=`dependency_types`.`id`" .
   " WHERE (`dependency_types`.`relevant_for_binary_packages` OR `d_rs`.`name`=\"unbuilt\")" .
@@ -123,7 +126,8 @@ $result = mysql_run_query(
   " JOIN `dependencies` ON `cons`.`dep`=`dependencies`.`id`" .
   " JOIN `binary_packages` ON `dependencies`.`dependent`=`binary_packages`.`id`" .
   " JOIN `architectures` ON `architectures`.`id`=`binary_packages`.`architecture`" .
-  " JOIN `repositories` ON `repositories`.`id`=`binary_packages`.`repository`" .
+  " JOIN `binary_packages_in_repositories` ON `binary_packages`.`id`=`binary_packages_in_repositories`.`package`" .
+  " JOIN `repositories` ON `binary_packages_in_repositories`.`repository`=`repositories`.`id`" .
   " JOIN `repository_stabilities` ON `repository_stabilities`.`id`=`repositories`.`stability`"
 );
 
@@ -139,7 +143,8 @@ $result = mysql_run_query(
   " JOIN `install_target_providers` ON `cons`.`itp`=`install_target_providers`.`id`" .
   " JOIN `binary_packages` ON `install_target_providers`.`package`=`binary_packages`.`id`" .
   " JOIN `architectures` ON `architectures`.`id`=`binary_packages`.`architecture`" .
-  " JOIN `repositories` ON `repositories`.`id`=`binary_packages`.`repository`" .
+  " JOIN `binary_packages_in_repositories` ON `binary_packages`.`id`=`binary_packages_in_repositories`.`package`" .
+  " JOIN `repositories` ON `binary_packages_in_repositories`.`repository`=`repositories`.`id`" .
   " JOIN `repository_stabilities` ON `repository_stabilities`.`id`=`repositories`.`stability`"
 );
 
