@@ -47,19 +47,18 @@ if (isset($_GET["graph"])) {
       $edges=$edges . "\"" . $link["depending_on"] . "\" -> \"" . $link["dependent"] . "\";\n";
   }
 
-  $knots = str_replace("\$","\\\$",$knots);
-  $edges = str_replace("\$","\\\$",$edges);
-
   header ("Content-type: image/png");
   passthru(
-    "dot -Tpng -o/dev/stdout /dev/stdin <<EOF\n" .
-    "digraph dependencies {\n" .
-    "rankdir=LR;\n" .
-    "fontname=dejavu;\n" .
-    $knots .
-    $edges .
-    "}\n" .
-    "EOF\n"
+    "echo \"" . base64_encode(
+      "digraph dependencies {\n" .
+      "rankdir=LR;\n" .
+      "fontname=dejavu;\n" .
+      $knots .
+      $edges .
+      "}\n"
+    ) . "\" | " .
+    "base64 -d | " .
+    "dot -Tpng -o/dev/stdout /dev/stdin"
   );
 
 } else { // isset($_GET["graph"])
