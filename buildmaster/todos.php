@@ -19,7 +19,7 @@ if (isset($_GET["graph"])) {
       $knot_rows[$row["id"]] =
         $row["file"]. " (line ".$row["line"]."):\\n".str_replace("\"","\\\"",$row["description"]);
 
-    unset($knots);
+    $knots="";
     foreach ($knot_rows as $knot)
       $knots=$knots . "\"" . $knot . "\";\n";
 
@@ -42,7 +42,7 @@ if (isset($_GET["graph"])) {
       $count++;
     }
 
-    unset($edges);
+    $edges="";
     foreach ($link_rows as $link)
       $edges=$edges . "\"" . $link["depending_on"] . "\" -> \"" . $link["dependent"] . "\";\n";
   }
