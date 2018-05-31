@@ -50,9 +50,9 @@
     $filter .= " AND NOT `binary_packages`.`has_issues`";
 
   if ($_GET["del"] == "To Be Deleted")
-    $filter .= " AND `binary_packages`.`is_to_be_deleted`";
+    $filter .= " AND `binary_packages_in_repositories`.`is_to_be_deleted`";
   if ($_GET["del"] == "Not To Be Deleted")
-    $filter .= " AND NOT `binary_packages`.`is_to_be_deleted`";
+    $filter .= " AND NOT `binary_packages_in_repositories`.`is_to_be_deleted`";
 
   if (isset($_GET["q"])) {
     $exact_filter = " AND `binary_packages`.`pkgname` = from_base64(\"".base64_encode($_GET["q"])."\")";
@@ -84,8 +84,8 @@
     "`binary_packages`.`sub_pkgrel`) AS `version`," .
     "IF(`binary_packages`.`has_issues`,1,0) AS `has_issues`," .
     "`build_assignments`.`return_date` AS `build_date`," .
-    "`binary_packages`.`last_moved` AS `move_date`," .
-    "IF(`binary_packages`.`is_to_be_deleted`,1,0) AS `is_to_be_deleted`" .
+    "`binary_packages_in_repositories`.`last_moved` AS `move_date`," .
+    "IF(`binary_packages_in_repositories`.`is_to_be_deleted`,1,0) AS `is_to_be_deleted`" .
     $query
   );
   $exact_matches = array();
@@ -126,12 +126,12 @@
     "move_date" => array(
       "title" => "last update",
       "label" => "Last Updated",
-      "mysql" => "IFNULL(`binary_packages`.`last_moved`,\"00-00-0000 00:00:00\")"
+      "mysql" => "IFNULL(`binary_packages_in_repositories`.`last_moved`,\"00-00-0000 00:00:00\")"
     ),
     "del" => array(
       "title" => "to be deleted",
       "label" => "Delete",
-      "mysql" => "`binary_packages`.`is_to_be_deleted`"
+      "mysql" => "`binary_packages_in_repositories`.`is_to_be_deleted`"
     )
   );
 
@@ -175,8 +175,8 @@
     "`binary_packages`.`sub_pkgrel`) AS `version`," .
     "IF(`binary_packages`.`has_issues`,1,0) AS `has_issues`," .
     "`build_assignments`.`return_date` AS `build_date`," .
-    "`binary_packages`.`last_moved` AS `move_date`," .
-    "IF(`binary_packages`.`is_to_be_deleted`,1,0) AS `is_to_be_deleted`" .
+    "`binary_packages_in_repositories`.`last_moved` AS `move_date`," .
+    "IF(`binary_packages_in_repositories`.`is_to_be_deleted`,1,0) AS `is_to_be_deleted`" .
     $query .
     " LIMIT " . (($page-1)*100) . ", 100"
   );

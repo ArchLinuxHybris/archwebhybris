@@ -34,7 +34,7 @@
     "`git_repositories`.`name` AS `git_repo`," .
     "`package_sources`.`uses_upstream`," .
     "`package_sources`.`uses_modification`," .
-    "`binary_packages`.`last_moved`" .
+    "`binary_packages_in_repositories`.`last_moved`" .
     " FROM `binary_packages`" .
     " JOIN `architectures` ON `binary_packages`.`architecture`=`architectures`.`id`" .
     " JOIN `binary_packages_in_repositories` ON `binary_packages`.`id`=`binary_packages_in_repositories`.`package`" .
@@ -79,7 +79,7 @@
       "\"  \\\"repo\\\": \\\"\",`repositories`.`name`,\"\\\",\\n\"," .
       "\"  \\\"arch\\\": \\\"\",`architectures`.`name`,\"\\\",\\n\"," .
       "\"  \\\"pkgname\\\": \\\"\",`binary_packages`.`pkgname`,\"\\\",\\n\"," .
-      "\"  \\\"is_to_be_deleted\\\": \\\"\",IF(`binary_packages`.`is_to_be_deleted`,\"1\",\"0\"),\"\\\"\\n\"," .
+      "\"  \\\"is_to_be_deleted\\\": \\\"\",IF(`binary_packages_in_repositories`.`is_to_be_deleted`,\"1\",\"0\"),\"\\\"\\n\"," .
       "\"}\"" .
     ")) AS `deps`," .
     "`install_targets`.`name` AS `install_target`" .
@@ -171,7 +171,7 @@
     "`repositories`.`is_on_master_mirror`," .
     "`architectures`.`name` AS `arch`," .
     "`binary_packages`.`pkgname`," .
-    "IF(`binary_packages`.`is_to_be_deleted`,1,0) AS `is_to_be_deleted`" .
+    "IF(`binary_packages_in_repositories`.`is_to_be_deleted`,1,0) AS `is_to_be_deleted`" .
     " FROM `install_target_providers`" .
     " JOIN `install_targets` ON `install_targets`.`id`=`install_target_providers`.`install_target`" .
     " AND `install_targets`.`name` NOT IN (\"base\",\"base-devel\")" .
@@ -218,7 +218,7 @@
   $mysql_result = mysql_run_query(
     "SELECT " .
     "`binary_packages`.`pkgname` AS `pkgname`," .
-    "IF(`binary_packages`.`is_to_be_deleted`,1,0) AS `is_to_be_deleted`," .
+    "IF(`binary_packages_in_repositories`.`is_to_be_deleted`,1,0) AS `is_to_be_deleted`," .
     "`repositories`.`name` AS `repo`," .
     "`repositories`.`is_on_master_mirror`," .
     "`architectures`.`name` AS `arch`," .
