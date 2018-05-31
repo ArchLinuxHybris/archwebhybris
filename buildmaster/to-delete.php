@@ -15,7 +15,7 @@
     "JOIN `architectures` ON `binary_packages`.`architecture`=`architectures`.`id` " .
     " JOIN `binary_packages_in_repositories` ON `binary_packages`.`id`=`binary_packages_in_repositories`.`package`" .
     " JOIN `repositories` ON `binary_packages_in_repositories`.`repository`=`repositories`.`id`" .
-    "WHERE `binary_packages`.`is_to_be_deleted` " .
+    "WHERE `binary_packages_in_repositories`.`is_to_be_deleted` " .
     "AND `repositories`.`is_on_master_mirror`"
   );
 

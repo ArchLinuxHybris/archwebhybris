@@ -24,10 +24,11 @@ if ($result -> num_rows > 0) {
 }
 
 $result = mysql_run_query(
-  "SELECT MAX(`binary_packages`.`last_moved`) AS `last_moved`" .
+  "SELECT MAX(`binary_packages_in_repositories`.`last_moved`) AS `last_moved`" .
   " FROM `binary_packages`" .
+  " JOIN `binary_packages_in_repositories` ON `binary_packages_in_repositories`.`package`=`binary_packages`.`id`" .
   " JOIN `build_assignments` ON `binary_packages`.`build_assignment`=`build_assignments`.`id`" .
-  " WHERE `binary_packages`.`last_moved`>`build_assignments`.`return_date`"
+  " WHERE `binary_packages_in_repositories`.`last_moved`>`build_assignments`.`return_date`"
 );
 
 if ($result -> num_rows > 0) {

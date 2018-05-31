@@ -17,7 +17,7 @@
     "`binary_packages`.`sub_pkgrel`,\"-\"," .
     "`architectures`.`name`) AS `pkgfile`," .
     "`install_targets`.`name` AS `install_target`," .
-    "IF(`binary_packages`.`is_to_be_deleted`,1,0) AS `is_to_be_deleted`," .
+    "IF(`binary_packages_in_repositories`.`is_to_be_deleted`,1,0) AS `is_to_be_deleted`," .
     "`subst_r`.`name` AS `subst_repository`," .
     "`subst_buildlist_bp`.`id` AS `subst_buildlist`" .
     " FROM `binary_packages`" .
@@ -48,7 +48,7 @@
     ")" .
     $ignore .
     " ORDER BY " .
-    "`binary_packages`.`is_to_be_deleted`," .
+    "`binary_packages_in_repositories`.`is_to_be_deleted`," .
     "`repositories`.`name`," .
     "`binary_packages`.`pkgname`," .
     "`install_targets`.`name`"
@@ -69,7 +69,7 @@
     "`architectures`.`name`) AS `pkgfile`," .
     "`install_targets`.`name` AS `install_target`," .
     "`repository_stabilities`.`name` AS `stability`," .
-    "IF(`binary_packages`.`is_to_be_deleted`,1,0) AS `is_to_be_deleted`" .
+    "IF(`binary_packages_in_repositories`.`is_to_be_deleted`,1,0) AS `is_to_be_deleted`" .
     " FROM `binary_packages`" .
     " JOIN `binary_packages_in_repositories` ON `binary_packages`.`id`=`binary_packages_in_repositories`.`package`" .
     " JOIN `repositories` ON `binary_packages_in_repositories`.`repository`=`repositories`.`id`" .
@@ -94,7 +94,7 @@
       " AND `repositories`.`stability`=`repository_stability_relations`.`less_stable`" .
     ")" .
     $ignore .
-    " ORDER BY `is_to_be_deleted`,`binary_packages`.`pkgname`,`install_targets`.`name`"
+    " ORDER BY `binary_packages_in_repositories`.`is_to_be_deleted`,`binary_packages`.`pkgname`,`install_targets`.`name`"
   );
 
   $stability_issues = array();
