@@ -17,7 +17,8 @@ if (isset($_GET["graph"])) {
 
     while ($row = $result->fetch_assoc())
       $knot_rows[$row["id"]] =
-        $row["file"]. " (line ".$row["line"]."):\\n".str_replace("\"","\\\"",$row["description"]);
+        $row["file"]. " (line ".$row["line"].") #".$row["id"].":\\n".
+        str_replace("\"","\\\"",$row["description"]);
 
     $knots="";
     foreach ($knot_rows as $knot)
