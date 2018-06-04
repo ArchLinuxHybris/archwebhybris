@@ -76,7 +76,7 @@ if (isset($_GET["graph"])) {
     while ($row = $result->fetch_assoc()) {
       print "<a href=\"#TODO" . $row["id"] . "\" name=\"TODO" . $row["id"] ."\">TODO #" . $row["id"] . "</a>";
       print " - ";
-      print "<a href=\"https://github.com/archlinux32/builder/blob/master/" . $row["file"] . "#L" . $row["line"] . "\">" . $row["file"] . "(line " . $row["line"] . ")</a>";
+      print "<a href=\"https://git.archlinux32.org/archlinux32/builder/src/branch/master/" . $row["file"] . "#L" . $row["line"] . "\">" . $row["file"] . "(line " . $row["line"] . ")</a>";
       print ":<br>\n";
       print str_replace("\\n","<br>\n",$row["description"]);
       print "<br>\n";

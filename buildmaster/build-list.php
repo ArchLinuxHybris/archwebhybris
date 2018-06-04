@@ -74,7 +74,7 @@ $columns = array(
     "mysql_query" =>
       "IF(`ba_q`.`uses_modification`," .
         "CONCAT(" .
-          "\"<a href=\\\"https://github.com/archlinux32/packages/tree/\"," .
+          "\"<a href=\\\"https://git.archlinux32.org/archlinux32/packages/src/commit/\"," .
           "`ba_q`.`mod_git_revision`," .
           "\"/\"," .
           "`ba_q`.`package_repository`," .
