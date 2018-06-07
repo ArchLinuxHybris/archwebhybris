@@ -29,6 +29,13 @@ $columns = array(
     "sort" => "deps",
     "title" => "number of dependencies on the build-list"
   ),
+  "arch" => array(
+    "label" => "Arch",
+    "mysql_name" => "arch",
+    "mysql_query" => "`ba_q`.`arch`",
+    "sort" => "arch",
+    "title" => "arch"
+  ),
   "pkgbase" => array(
     "label" => "Package",
     "mysql_name" => "pkgbase_print",
