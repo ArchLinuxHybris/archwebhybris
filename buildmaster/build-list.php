@@ -154,8 +154,10 @@ if (!isset($_GET["sort"]))
 if (substr($_GET["sort"],0,1) == "-") {
   $direction = " DESC";
   $sort = substr($_GET["sort"],1);
-} else
+} else {
+  $direction = " ASC";
   $sort = $_GET["sort"];
+}
 
 if (isset($columns[$sort]))
   $order = "IFNULL(" . $columns[$sort]["mysql_name"] . ",0) " . $direction . ",";
