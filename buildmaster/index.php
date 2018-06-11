@@ -12,6 +12,7 @@
     <a href="/buildmaster/build-list.php">build list</a>
     <a href="/buildmaster/build-list.php?show=broken">broken packages</a><br>
     <a href="/buildmaster/build-slaves.php">build-slaves</a>
+    <a href="/buildmaster/gpg-keys.php">gpg-keys</a>
     <a href="/buildmaster/status.php">status</a><br>
     <a href="https://buildmaster.archlinux32.org/build-logs/">build logs</a><br>
     <a href="/buildmaster/log.php?show=ssh">ssh-log</a>
