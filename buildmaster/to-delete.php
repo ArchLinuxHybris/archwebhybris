@@ -35,7 +35,20 @@ if ($result -> num_rows > 0) {
   $count = 0;
 
   while ($row = $result->fetch_assoc()) {
+
+    if (strstr(
+      file_get_contents(
+        "https://www.archlinux.org/packages/search/json/?q=" .
+        $row["pkgname"]
+      ),
+      "\"pkgname\": \"".$row["pkgname"]."\""
+    ) === FALSE)
+      $color = "#00FF00";
+    else
+      $color = "#FF0000";
+
     $rows[$count] =
+      "<font color=\"" . $color . "\">" .
       $row["repo"] . "/" .
       $row["pkgname"] . "-";
     if ($row["epoch"] != "0")
@@ -47,7 +60,7 @@ if ($result -> num_rows > 0) {
       $row["pkgver"] . "-" .
       $row["pkgrel"] . "." .
       $row["sub_pkgrel"] . "-" .
-      $row["arch"] . ".pkg.tar.xz";
+      $row["arch"] . ".pkg.tar.xz</font>";
     $count++;
   }
 
