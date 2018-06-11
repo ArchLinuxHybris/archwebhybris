@@ -19,6 +19,11 @@
     "AND `repositories`.`is_on_master_mirror`"
   );
 
+  $available = explode(
+    "\n",
+    shell_exec("find /var/lib/pacman/ -name '*.db' -exec tar -tzf {} \; | sed -n 's,-[^-]\+-[^-]\+/$,,;T;p'")
+  );
+  $available = array_combine( $available, $available);
 ?>
 <html>
 <head>
@@ -36,16 +41,10 @@ if ($result -> num_rows > 0) {
 
   while ($row = $result->fetch_assoc()) {
 
-    if (strstr(
-      file_get_contents(
-        "https://www.archlinux.org/packages/search/json/?q=" .
-        $row["pkgname"]
-      ),
-      "\"pkgname\": \"".$row["pkgname"]."\""
-    ) === FALSE)
-      $color = "#00FF00";
-    else
+    if (isset($available[$row["pkgname"]]))
       $color = "#FF0000";
+    else
+      $color = "#00FF00";
 
     $rows[$count] =
       "<font color=\"" . $color . "\">" .
