@@ -37,9 +37,11 @@ show_warning_on_offline_slave();
         }
       }
       print "<tr>";
-      print "<td>".$row["person"]."</td>";
-      print "<td>".$row["action"]."</td>";
-      print "<td>".$row["fingerprint"]."</td>";
+      print "<td>" . $row["person"] . "</td>";
+      print "<td>" . $row["action"] . "</td>";
+      print "<td><a href=\"http://pgp.mit.edu/pks/lookup?op=get&search=0x" .
+        substr($row["fingerprint"],-16) .
+        "\">" . $row["fingerprint"] . "</a></td>";
       print "</tr>\n";
     }
   }
