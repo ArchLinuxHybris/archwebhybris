@@ -43,7 +43,7 @@
     " AND `subst_buildlist_r`.`name`=\"build-list\"".
     ") ON `subst_buildlist_bp`.`pkgname`=`binary_packages`.`pkgname`" .
     " WHERE NOT EXISTS (" .
-      "SELECT * FROM `install_target_providers`" .
+      "SELECT 1 FROM `install_target_providers`" .
       " WHERE `install_target_providers`.`install_target` = `dependencies`.`depending_on`" .
     ")" .
     $ignore .
@@ -81,11 +81,11 @@
     " JOIN `install_targets` ON `dependencies`.`depending_on`=`install_targets`.`id`" .
     " JOIN `architectures` ON `binary_packages`.`architecture`=`architectures`.`id`" .
     " WHERE EXISTS (" .
-      "SELECT * FROM `install_target_providers`" .
+      "SELECT 1 FROM `install_target_providers`" .
       " WHERE `install_target_providers`.`install_target` = `dependencies`.`depending_on`" .
     ")" .
     " AND NOT EXISTS (" .
-      "SELECT * FROM `install_target_providers`" .
+      "SELECT 1 FROM `install_target_providers`" .
       " JOIN `binary_packages` AS `prov_bp` ON `prov_bp`.`id`=`install_target_providers`.`package`" .
       " JOIN `binary_packages_in_repositories` AS `prov_bpir` ON `prov_bp`.`id`=`prov_bpir`.`package`" .
       " JOIN `repositories` AS `prov_r` ON `prov_bpir`.`repository`=`prov_r`.`id`" .
