@@ -92,6 +92,17 @@
       " JOIN `repository_stability_relations` ON `prov_r`.`stability`=`repository_stability_relations`.`more_stable`" .
       " WHERE `install_target_providers`.`install_target` = `dependencies`.`depending_on`" .
       " AND `repositories`.`stability`=`repository_stability_relations`.`less_stable`" .
+      " AND NOT EXISTS (" .
+        "SELECT 1 FROM `binary_packages` AS `sup_bp`" .
+        " JOIN `binary_packages_in_repositories` AS `sup_bpir` ON `sup_bp`.`id`=`sup_bpir`.`package`" .
+        " JOIN `repositories` AS `sup_r` ON `sup_bpir`.`repository`=`sup_r`.`id`" .
+        " JOIN `repository_stability_relations` AS `sup_rra` ON `sup_r`.`stability`=`sup_rra`.`more_stable`" .
+        " JOIN `repository_stability_relations` AS `sup_rrb` ON `sup_r`.`stability`=`sup_rrb`.`less_stable`" .
+        " WHERE `sup_bp`.`pkgname` = `prov_bp`.`pkgname`" .
+        " AND `sup_bp`.`id` != `prov_bp`.`id`" .
+        " AND `repositories`.`stability`=`sup_rra`.`less_stable`" .
+        " AND `prov_r`.`stability`=`sup_rrb`.`more_stable`" .
+      ")" .
     ")" .
     $ignore .
     " ORDER BY `binary_packages_in_repositories`.`is_to_be_deleted`,`binary_packages`.`pkgname`,`install_targets`.`name`"
