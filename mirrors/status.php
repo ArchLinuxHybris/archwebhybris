@@ -34,7 +34,7 @@ $result = mysql_run_query(
   "`l_ms`.`ipv4`," .
   "`l_ms`.`ipv6`," .
   "`l_ms`.`active`," .
-  "AVG(IF(`a_ms`.`active`,1,0)) AS `completion`," .
+  "AVG(IF(`a_ms`.`active`,1,0)) AS `completion_pct`," .
   "COUNT(1) AS `count`" .
   " FROM `ls`" .
   " JOIN `mirror_statuses` AS `l_ms` ON `ls`.`id`=`l_ms`.`id`" .
@@ -47,8 +47,22 @@ $last_check = 0;
 $max_count = 0;
 
 while($row = $result->fetch_assoc()) {
+  foreach (array(
+    "start",
+    "delay",
+    "duration_avg",
+    "duration_stddev",
+    "completion_pct",
+    "count",
+    "isos",
+    "ipv4",
+    "ipv6",
+    "active"
+  ) as $key)
+    $row[$key] = floatval($row[$key]);
+  $row["last_sync"] = gmdate("Y-m-d\TH:i:s\Z", $row["last_sync"]);
   $row["score"] = 
-    ($row["delay"] + $row["duration_avg"] + $row["duration_stddev"]) / $row["completion"];
+    ($row["delay"] + $row["duration_avg"] + $row["duration_stddev"]) / $row["completion_pct"];
   $urls[] = $row;
   $last_check = max ($row["start"], $last_check);
   $max_count = max ($row["count"], $max_count);
@@ -58,7 +72,7 @@ $content = array(
   "cutoff" => $cutoff,
   "check_frequency" => $cutoff/$max_count,
   "num_checks" => $max_count,
-  "last_check" => gmdate("Y-m-d\TH:i:s.v",$last_check), //"2018-06-15T07:25:06.741Z",
+  "last_check" => gmdate("Y-m-d\TH:i:s.v\Z",$last_check), //"2018-06-15T07:25:06.741Z",
 //  "version" => 3,
   "urls" => $urls
 );
