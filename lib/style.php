@@ -15,6 +15,7 @@ function print_header($title) {
     <link rel="stylesheet" type="text/css" href="/static/archweb.css" media="screen, projection" />
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
     <link rel="shortcut icon" type="image/x-icon" href="/static/favicon.ico" />
+    <link rel="stylesheet" type="text/css" href="/static/flags/fam.47411010d402.css" media="screen, projection" />
   </head>
   <body class="">
     <div id="archnavbar" class="anb-packages">
