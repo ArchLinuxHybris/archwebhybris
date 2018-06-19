@@ -1,6 +1,7 @@
 <?php
+require_once "../init.php"
 
-  include "lib/mysql.php";
+require_once BASE . "/lib/mysql.php";
 
   $result = mysql_run_query(
     "SELECT DISTINCT `architectures`.`name` AS `architecture`,`package_sources`.`pkgbase`,`build_assignments`.`is_black_listed` " .

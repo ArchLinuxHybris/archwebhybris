@@ -1,6 +1,6 @@
 <?php
-
-include "lib/mysql.php";
+require_once "../init.php";
+require_once BASE . "/lib/mysql.php";
 
 if (isset($_GET["from"]))
   $min_time="from_base64(\"" . base64_encode("-".$_GET["from"]) . "\")";

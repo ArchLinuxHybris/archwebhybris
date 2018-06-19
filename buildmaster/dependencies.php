@@ -1,6 +1,6 @@
 <?php
-
-include "lib/mysql.php";
+require_once "../init.php";
+require_once BASE . "/lib/mysql.php";
 
 $match = "";
 

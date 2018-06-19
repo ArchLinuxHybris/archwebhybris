@@ -1,7 +1,9 @@
 <?php
+require_once "../init.php";
 
-  include "lib/mysql.php";
-  include "lib/style.php";
+require_once BASE . "/lib/mysql.php";
+require_once BASE . "/lib/style.php";
+
 
   foreach (array("bugs","sort","del") as $expected_param)
     if (! isset($_GET[$expected_param]))

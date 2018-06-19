@@ -1,7 +1,7 @@
 <?php
-
-include "lib/mysql.php";
-include "lib/style.php";
+require_once "../init.php";
+include BASE . "/lib/mysql.php";
+include BASE . "/lib/style.php";
 
 $result = mysql_run_query(
   "SELECT MAX(`package_sources`.`commit_time`) AS `last_commit`" .

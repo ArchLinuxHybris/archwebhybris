@@ -1,7 +1,8 @@
 <?php
+require_once "../init.php";
 
-include "lib/mysql.php";
-include "lib/style.php";
+require_once BASE . "/lib/mysql.php";
+require_once BASE . "/lib/style.php";
 
 if (isset($_GET["show"]))
   $to_show=$_GET["show"];

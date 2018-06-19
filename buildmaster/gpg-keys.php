@@ -1,4 +1,6 @@
 <?php
+require_once "../init.php"
+require_once BASE . "/lib/mysql.php";
 
   include "lib/mysql.php";
 

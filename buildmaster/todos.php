@@ -1,6 +1,6 @@
 <?php
-
-include "lib/mysql.php";
+require_once "../init.php";
+include BASE . "/lib/mysql.php";
 
 $result = mysql_run_query(
   "SELECT DISTINCT " .
