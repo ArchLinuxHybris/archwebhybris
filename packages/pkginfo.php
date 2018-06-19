@@ -132,7 +132,7 @@
   $dep_it = array_map("dependency_extract_name", $dep_it);
   $dep_it = preg_replace("/[<=>].*$/","",$dep_it);
   $js_dep = preg_replace("/[<=>].*$/","",$json_content["Depends On"]);
-  if ($js_dep == "None")
+  if (!is_array($js_dep))
     $js_dep = array();
   if (!isset($dep_it))
     $dep_it = array();
