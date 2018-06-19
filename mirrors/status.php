@@ -1,6 +1,7 @@
 <?php
+require "../init.php";
 
-include "lib/mysql.php";
+require BASE . "/lib/mysql.php";
 
 $cutoff = 86400;
 

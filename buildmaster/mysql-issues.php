@@ -1,6 +1,6 @@
 <?php
-
-  include "lib/mysql.php";
+require "../init.php"
+include BASE . "/lib/mysql.php";
 
   if (isset($_GET["ignore-haskell"]))
     $ignore = " AND `install_targets`.`name` NOT LIKE \"libHS%\"";

@@ -1,6 +1,7 @@
 <?php
+require "../init.php"
+require BASE . "/lib/mysql.php";
 
-  include "lib/mysql.php";
 
   $filter = "";
   if (isset($_GET["show"]) &&

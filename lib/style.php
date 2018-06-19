@@ -3,7 +3,7 @@
 if (function_exists("print_header"))
   return;
 
-include "lib/mysql.php";
+require "lib/mysql.php";
 
 function print_header($title) {
 ?>

@@ -1,6 +1,6 @@
 <?php
-
-  include "lib/mysql.php";
+require "../init.php";
+require BASE . "/lib/mysql.php";
 
 ?>
 <html>
