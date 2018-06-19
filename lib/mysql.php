@@ -4,7 +4,8 @@
 if (isset($mysql))
   return;
 
-include "lib/http.php";
+require_once "../init.php";
+include_once BASE . "/lib/http.php";
 
 $mysql = new mysqli("localhost", "webserver", "empty", "buildmaster");
 if ( $mysql -> connect_error ) {
