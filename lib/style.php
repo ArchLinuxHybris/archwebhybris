@@ -3,7 +3,8 @@
 if (function_exists("print_header"))
   return;
 
-require "lib/mysql.php";
+require_once "../init.php"
+require_once BASE . "/lib/mysql.php";
 
 function print_header($title) {
 ?>

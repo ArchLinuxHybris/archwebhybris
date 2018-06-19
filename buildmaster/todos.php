@@ -1,5 +1,5 @@
 <?php
-require "../init.php";
+require_once "../init.php";
 include BASE . "/lib/mysql.php";
 
 $result = mysql_run_query(

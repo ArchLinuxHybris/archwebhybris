@@ -1,5 +1,5 @@
 <?php
-require "../init.php";
+require_once "../init.php";
 include BASE . "/lib/mysql.php";
 include BASE . "/lib/style.php";
 

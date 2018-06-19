@@ -1,7 +1,7 @@
 <?php
-require "../init.php";
+require_once "../init.php";
 
-require BASE . "/lib/mysql.php";
+require_once BASE . "/lib/mysql.php";
 
 $cutoff = 86400;
 
