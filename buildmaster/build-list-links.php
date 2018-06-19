@@ -5,6 +5,9 @@ include "lib/mysql.php";
 $edges = "";
 $knots = "";
 
+if (!isset($_GET["raw"]))
+  $limit = " LIMIT 150";
+
 $query =
   "CREATE TEMPORARY TABLE `ba` (" .
     "`id` BIGINT, " .
@@ -27,7 +30,7 @@ $query =
   " JOIN `repositories` ON `binary_packages_in_repositories`.`repository`=`repositories`.`id`" .
   " JOIN `build_assignments` ON `binary_packages`.`build_assignment`=`build_assignments`.`id`" .
   " WHERE `repositories`.`name`=\"build-list\"" .
-  " LIMIT 150";
+  $limit;
 if (isset($_GET["raw"]))
   print $query . ";\n";
 mysql_run_query($query);
