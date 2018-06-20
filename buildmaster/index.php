@@ -10,6 +10,7 @@ require_once BASE . "/lib/mysql.php";
   <body>
 <?php show_warning_on_offline_slave(); ?>
     <a href="/buildmaster/build-list.php">build list</a>
+    as <a href="/buildmaster/build-list-links.php">graph</a>
     <a href="/buildmaster/build-list.php?show=broken">broken packages</a><br>
     <a href="/buildmaster/build-slaves.php">build-slaves</a>
     <a href="/buildmaster/gpg-keys.php">gpg-keys</a>
