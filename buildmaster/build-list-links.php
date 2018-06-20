@@ -22,7 +22,7 @@ mysql_run_query($query);
 
 $query =
   "INSERT IGNORE INTO `ba` (`id`,`color`)" .
-  " SELECT" .
+  " SELECT DISTINCT" .
   " `build_assignments`.`id`," .
   "IF(`build_assignments`.`is_broken`,\"#ff0000\",IF(`build_assignments`.`is_blocked` IS NULL,\"#000000\",\"#800000\"))" .
   " FROM `binary_packages_in_repositories`" .
