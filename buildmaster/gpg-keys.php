@@ -2,8 +2,6 @@
 require_once "../init.php";
 require_once BASE . "/lib/mysql.php";
 
-  include "lib/mysql.php";
-
   $result = mysql_run_query(
     "SELECT" .
     " GROUP_CONCAT(`email_actions`.`name`) AS `action`," .
