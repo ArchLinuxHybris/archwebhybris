@@ -5,6 +5,37 @@ require_once BASE . "/lib/mysql.php";
 $edges = "";
 $knots = "";
 
+if (isset($_GET["show_all"]))
+  $available_filter = " LEFT";
+else
+  $available_filter = "";
+
+$available = explode(
+  "\n",
+  shell_exec("find /var/lib/pacman/ -name '*.db' -exec tar -tzf {} \; | sed -n 's,-[^-]\+-[^-]\+/$,,;T;p' | sort -u")
+);
+
+mysql_run_query(
+  "CREATE TEMPORARY TABLE `available` (" .
+    "`pkgname` VARCHAR(88), " .
+    "UNIQUE KEY `name` (`pkgname`)" .
+  ")"
+);
+
+mysql_run_query(
+  "INSERT INTO `available` (`pkgname`) VALUES (\"" .
+  implode(array_map("base64_encode", $available), "\"),(\"") .
+  "\")"
+);
+
+mysql_run_query(
+  "DELETE FROM `available` WHERE `available`.`pkgname`=\"\""
+);
+
+mysql_run_query(
+  "UPDATE `available` SET `available`.`pkgname`=from_base64(`available`.`pkgname`)"
+);
+
 mysql_run_query(
   "CREATE TEMPORARY TABLE `d_bpir` (" .
     "`id` BIGINT, " .
@@ -18,10 +49,20 @@ mysql_run_query(
   "INSERT IGNORE INTO `d_bpir` (`id`,`color`)" .
   " SELECT" .
   " `binary_packages_in_repositories`.`id`," .
-  "IF(`build_assignments`.`is_black_listed` IS NULL,\"#800000\",\"#ff0000\") AS `color`" .
+  "IF(" .
+    "`available`.`pkgname` IS NULL," .
+    "\"#00ff00\"," .
+    "IF(" .
+      "`build_assignments`.`is_black_listed` IS NULL," .
+      "\"#800000\"," .
+      "\"#ff0000\"" .
+    ")" .
+  ") AS `color`" .
   " FROM `binary_packages_in_repositories`" .
   " JOIN `binary_packages` ON `binary_packages_in_repositories`.`package`=`binary_packages`.`id`" .
   " JOIN `build_assignments` ON `binary_packages`.`build_assignment`=`build_assignments`.`id`" .
+  $available_filter .
+  " JOIN `available` ON `available`.`pkgname`=`binary_packages`.`pkgname`" .
   " WHERE `binary_packages_in_repositories`.`is_to_be_deleted`" .
   " AND `binary_packages`.`pkgname` NOT LIKE \"lib32-%\""
 );
