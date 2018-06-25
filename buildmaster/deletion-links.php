@@ -51,7 +51,7 @@ mysql_run_query(
 );
 
 mysql_run_query(
-  "INSERT INTO `d_bpir_links` (`dependent`,`depending_on`,`dep_type`)" .
+  "INSERT IGNORE INTO `d_bpir_links` (`dependent`,`depending_on`,`dep_type`)" .
   " SELECT `d_bpir`.`id`," .
   " `itp_bpir`.`id`," .
   " `dependencies`.`dependency_type`" .
