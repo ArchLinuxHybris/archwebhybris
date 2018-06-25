@@ -24,7 +24,6 @@ mysql_run_query(
   " JOIN `build_assignments` ON `binary_packages`.`build_assignment`=`build_assignments`.`id`" .
   " WHERE `binary_packages_in_repositories`.`is_to_be_deleted`" .
   " AND `binary_packages`.`pkgname` NOT LIKE \"lib32-%\""
-  . " LIMIT 25" // TODO: remove
 );
 
 mysql_run_query(
@@ -107,8 +106,6 @@ mysql_run_query(
   " JOIN `d_bpir` ON `d_bpir`.`id`=`d_bpir_copy`.`id`" .
   " SET `d_bpir_copy`.`group`=`d_bpir`.`group`"
 );
-
-// TODO
 
 $result = mysql_run_query(
   "SELECT MAX(`d_bpir`.`id`) AS `id`," .
