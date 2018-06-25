@@ -8,71 +8,122 @@ $knots = "";
 mysql_run_query(
   "CREATE TEMPORARY TABLE `d_bpir` (" .
     "`id` BIGINT, " .
-    "`arch` MEDIUMINT, " .
+    "`group` VARCHAR(256), " .
+    "`color` VARCHAR(7), " .
     "UNIQUE KEY `id` (`id`)" .
   ")"
 );
 
 mysql_run_query(
-  "INSERT IGNORE INTO `d_bpir` (`id`,`arch`)" .
-  " SELECT `binary_packages_in_repositories`.`id`,`repositories`.`architecture`" .
+  "INSERT IGNORE INTO `d_bpir` (`id`,`color`)" .
+  " SELECT" .
+  " `binary_packages_in_repositories`.`id`," .
+  "IF(`build_assignments`.`is_black_listed` IS NULL,\"#800000\",\"#ff0000\") AS `color`" .
   " FROM `binary_packages_in_repositories`" .
   " JOIN `binary_packages` ON `binary_packages_in_repositories`.`package`=`binary_packages`.`id`" .
-  " JOIN `repositories` ON `binary_packages_in_repositories`.`repository`=`repositories`.`id`" .
+  " JOIN `build_assignments` ON `binary_packages`.`build_assignment`=`build_assignments`.`id`" .
   " WHERE `binary_packages_in_repositories`.`is_to_be_deleted`" .
   " AND `binary_packages`.`pkgname` NOT LIKE \"lib32-%\""
+  . " LIMIT 25" // TODO: remove
 );
 
 mysql_run_query(
   "CREATE TEMPORARY TABLE `d_bpir_copy` (" .
     "`id` BIGINT, " .
-    "`arch` MEDIUMINT, " .
+    "`group` VARCHAR(256), " .
+    "`color` VARCHAR(7), " .
     "UNIQUE KEY `id` (`id`)" .
   ")"
 );
 
 mysql_run_query(
-  "INSERT IGNORE INTO `d_bpir_copy` (`id`,`arch`)" .
-  " SELECT `d_bpir`.`id`,`d_bpir`.`arch`" .
+  "INSERT IGNORE INTO `d_bpir_copy` (`id`,`color`)" .
+  " SELECT `d_bpir`.`id`,`d_bpir`.`color`" .
   " FROM `d_bpir`"
 );
 
 mysql_run_query(
-  "CREATE TEMPORARY TABLE `d_it` (" .
-    "`id` BIGINT, " .
-    "`arch` MEDIUMINT, " .
-    "UNIQUE KEY `id` (`id`)" .
+  "CREATE TEMPORARY TABLE `d_bpir_links` (" .
+    "`dependent` BIGINT, " .
+    "`depending_on` BIGINT, " .
+    "`dep_type` SMALLINT, " .
+    "UNIQUE KEY `content` (`dependent`,`depending_on`,`dep_type`)" .
   ")"
 );
 
 mysql_run_query(
-  "INSERT IGNORE INTO `d_it` (`id`,`arch`)" .
-  " SELECT `install_target_providers`.`install_target`,`d_bpir`.`arch`" .
+  "INSERT INTO `d_bpir_links` (`dependent`,`depending_on`,`dep_type`)" .
+  " SELECT `d_bpir`.`id`," .
+  " `itp_bpir`.`id`," .
+  " `dependencies`.`dependency_type`" .
   " FROM `d_bpir`" .
-  " JOIN `binary_packages_in_repositories` ON `binary_packages_in_repositories`.`id`=`d_bpir`.`id`" .
-  " JOIN `install_target_providers` ON `binary_packages_in_repositories`.`package`=`install_target_providers`.`package`" .
-  " WHERE NOT EXISTS (" .
-    "SELECT 1 FROM `install_target_providers` AS `subst_itp`" .
-    " JOIN `binary_packages_in_repositories` AS `subst_bpir` ON `subst_bpir`.`package`=`subst_itp`.`package`" .
-    " JOIN `repositories` ON `subst_bpir`.`repository`=`repositories`.`id`" .
-    " WHERE NOT `subst_bpir`.`is_to_be_deleted`" .
-    " AND `subst_itp`.`install_target`=`install_target_providers`.`install_target`" .
-    " AND `repositories`.`architecture`=`d_bpir`.`arch`" .
+  " JOIN `binary_packages_in_repositories` ON `d_bpir`.`id`=`binary_packages_in_repositories`.`id`" .
+  " JOIN `dependencies` ON `binary_packages_in_repositories`.`package`=`dependencies`.`dependent`" .
+  " JOIN `install_target_providers` ON `install_target_providers`.`install_target`=`dependencies`.`depending_on`" .
+  " JOIN `binary_packages_in_repositories` AS `itp_bpir` ON `itp_bpir`.`package`=`install_target_providers`.`package`" .
+  " JOIN `d_bpir_copy` ON `itp_bpir`.`id`=`d_bpir_copy`.`id`" .
+  " WHERE `dependencies`.`dependent`!=`install_target_providers`.`package`"
+);
+
+mysql_run_query(
+  "CREATE TEMPORARY TABLE `d_bpir_links_copy` (" .
+    "`dependent` BIGINT, " .
+    "`depending_on` BIGINT, " .
+    "`dep_type` SMALLINT, " .
+    "UNIQUE KEY `content` (`dependent`,`depending_on`,`dep_type`)" .
   ")"
 );
 
+mysql_run_query(
+  "INSERT IGNORE INTO `d_bpir_links_copy` (`dependent`,`depending_on`,`dep_type`)" .
+  " SELECT `d_bpir_links`.`dependent`,`d_bpir_links`.`depending_on`,`d_bpir_links`.`dep_type`" .
+  " FROM `d_bpir_links`"
+);
+
+mysql_run_query(
+  "UPDATE `d_bpir`" .
+  " JOIN (" .
+  "SELECT" .
+  " `d_bpir_copy`.`id`," .
+  "SHA2(" .
+    "GROUP_CONCAT(CONCAT(" .
+      "IFNULL(`d_bpir_copy`.`color`,\"0\"),\":\"," .
+      "IFNULL(`d_bpir_links`.`depending_on`,\"0\"),\":\"," .
+      "IFNULL(`d_bpir_links`.`dep_type`,\"0\"),\":\"," .
+      "IFNULL(`d_bpir_links_copy`.`dependent`,\"0\"),\":\"," .
+      "IFNULL(`d_bpir_links_copy`.`dep_type`,\"0\")" .
+    "))" .
+  ",256) AS `hash`" .
+  " FROM `d_bpir_copy`" .
+  " LEFT JOIN `d_bpir_links` ON `d_bpir_links`.`dependent`=`d_bpir_copy`.`id`" .
+  " LEFT JOIN `d_bpir_links_copy` ON `d_bpir_links_copy`.`depending_on`=`d_bpir_copy`.`id`" .
+  " GROUP BY `d_bpir_copy`.`id`" .
+  ") AS `grouped_d_bpir` ON `grouped_d_bpir`.`id`=`d_bpir`.`id`" .
+  " SET `d_bpir`.`group`=`grouped_d_bpir`.`hash`"
+);
+
+mysql_run_query(
+  "UPDATE `d_bpir_copy`" .
+  " JOIN `d_bpir` ON `d_bpir`.`id`=`d_bpir_copy`.`id`" .
+  " SET `d_bpir_copy`.`group`=`d_bpir`.`group`"
+);
+
+// TODO
+
 $result = mysql_run_query(
-  "SELECT `binary_packages_in_repositories`.`id`," .
-  "`architectures`.`name` AS `arch`," .
-  "`binary_packages`.`pkgname`," .
-  "`repositories`.`name` AS `repo`," .
-  "IF(`build_assignments`.`is_black_listed` IS NULL,\"#800000\",\"#ff0000\") AS `color`" .
+  "SELECT MAX(`d_bpir`.`id`) AS `id`," .
+  "GROUP_CONCAT(CONCAT(" .
+    "`architectures`.`name`,\"/\"," .
+    "`repositories`.`name`,\"/\"," .
+    "`binary_packages`.`pkgname`" .
+  ") SEPARATOR \",\n\") AS `name`," .
+  "`d_bpir`.`color`" .
   " FROM `d_bpir`" .
   " JOIN `binary_packages_in_repositories` ON `d_bpir`.`id`=`binary_packages_in_repositories`.`id`" .
   " JOIN `binary_packages` ON `binary_packages`.`id`=`binary_packages_in_repositories`.`package`" .
-  " JOIN `build_assignments` ON `binary_packages`.`build_assignment`=`build_assignments`.`id`" .
   " JOIN `repositories` ON `binary_packages_in_repositories`.`repository`=`repositories`.`id`" .
-  " JOIN `architectures` ON `repositories`.`architecture`=`architectures`.`id`"
+  " JOIN `architectures` ON `repositories`.`architecture`=`architectures`.`id`" .
+  " GROUP BY `d_bpir`.`group`"
 );
 
 while ($row = $result->fetch_assoc())
@@ -80,29 +131,21 @@ while ($row = $result->fetch_assoc())
     "\"p" .
     $row["id"] .
     "\" [label = \"" .
-    $row["arch"] .
-    "/" .
-    $row["repo"] .
-    "/" .
-    $row["pkgname"] .
+    $row["name"] .
     "\",
     fontcolor = \"" .
     $row["color"] .
     "\"];\n";
 
 $result = mysql_run_query(
-  "SELECT `d_bpir`.`id` AS `dependent`," .
+  "SELECT MAX(`d_bpir_links`.`dependent`) AS `dependent`," .
   "`dependency_types`.`name` AS `dep_type`," .
-  "`itp_bpir`.`id` AS `depending_on`" .
-  " FROM `d_bpir`" .
-  " JOIN `binary_packages_in_repositories` ON `d_bpir`.`id`=`binary_packages_in_repositories`.`id`" .
-  " JOIN `dependencies` ON `binary_packages_in_repositories`.`package`=`dependencies`.`dependent`" .
-  " JOIN `dependency_types` ON `dependencies`.`dependency_type`=`dependency_types`.`id`" .
-  " JOIN `install_target_providers` ON `install_target_providers`.`install_target`=`dependencies`.`depending_on`" .
-  " JOIN `d_it` ON `d_it`.`id`=`install_target_providers`.`install_target`" .
-  " JOIN `binary_packages_in_repositories` AS `itp_bpir` ON `itp_bpir`.`package`=`install_target_providers`.`package`" .
-  " JOIN `d_bpir_copy` ON `itp_bpir`.`id`=`d_bpir_copy`.`id`" .
-  " WHERE `dependencies`.`dependent`!=`install_target_providers`.`package`"
+  "MAX(`d_bpir_links`.`depending_on`) AS `depending_on`" .
+  " FROM `d_bpir_links`" .
+  " JOIN `dependency_types` ON `d_bpir_links`.`dep_type`=`dependency_types`.`id`" .
+  " JOIN `d_bpir` ON `d_bpir`.`id`=`d_bpir_links`.`dependent`" .
+  " JOIN `d_bpir_copy` ON `d_bpir_copy`.`id`=`d_bpir_links`.`depending_on`" .
+  " GROUP BY CONCAT(`d_bpir`.`group`,\"-\",`d_bpir_copy`.`group`)"
 );
 
 while ($row = $result->fetch_assoc()) {
