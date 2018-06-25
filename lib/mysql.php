@@ -19,6 +19,13 @@ function mysql_run_query($query) {
   return $result;
 }
 
+function mysql_prepare_query($query) {
+  global $mysql;
+  if ( ! $result = $mysql -> prepare($query) )
+    die_500( "Prepare failed: " . $mysql -> error );
+  return $result;
+}
+
 function show_warning_on_offline_slave() {
   $result = mysql_run_query("SHOW STATUS LIKE \"Slave_running\"");
   if (($result -> num_rows == 0) ||
