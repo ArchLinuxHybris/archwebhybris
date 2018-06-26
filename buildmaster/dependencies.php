@@ -156,7 +156,7 @@ $edges = str_replace("\$","\\\$",$edges);
 
 header ("Content-type: image/png");
 passthru(
-  "dot -Tpng -o/dev/stdout /dev/stdin <<EOF\n" .
+  "timeout 30 dot -Tpng -o/dev/stdout /dev/stdin <<EOF\n" .
   "digraph dependencies {\n" .
   "rankdir=LR;\n" .
   "fontname=dejavu;\n" .

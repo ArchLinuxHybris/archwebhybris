@@ -224,7 +224,7 @@ if (isset($_GET["raw"])) {
 
   header ("Content-type: image/png");
   passthru(
-    "dot -Tpng -o/dev/stdout " . $input_file
+    "timeout 30 dot -Tpng -o/dev/stdout " . $input_file
   );
 
   unlink($input_file);

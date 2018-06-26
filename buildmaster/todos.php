@@ -59,7 +59,7 @@ if (isset($_GET["graph"])) {
       "}\n"
     ) . "\" | " .
     "base64 -d | " .
-    "dot -Tpng -o/dev/stdout /dev/stdin"
+    "timeout 30 dot -Tpng -o/dev/stdout /dev/stdin"
   );
 
 } else { // isset($_GET["graph"])
