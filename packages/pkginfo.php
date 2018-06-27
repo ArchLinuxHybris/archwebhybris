@@ -35,7 +35,8 @@ require_once BASE . "/lib/style.php";
     "`git_repositories`.`name` AS `git_repo`," .
     "`package_sources`.`uses_upstream`," .
     "`package_sources`.`uses_modification`," .
-    "`binary_packages_in_repositories`.`last_moved`" .
+    "`binary_packages_in_repositories`.`last_moved`," .
+    "`sr`.`name` AS `stable_repo`" .
     " FROM `binary_packages`" .
     " JOIN `architectures` ON `binary_packages`.`architecture`=`architectures`.`id`" .
     " JOIN `binary_packages_in_repositories` ON `binary_packages`.`id`=`binary_packages_in_repositories`.`package`" .
@@ -45,9 +46,16 @@ require_once BASE . "/lib/style.php";
     " JOIN `package_sources` ON `build_assignments`.`package_source`=`package_sources`.`id`" .
     " JOIN `upstream_repositories` ON `package_sources`.`upstream_package_repository`=`upstream_repositories`.`id`" .
     " JOIN `git_repositories` ON `upstream_repositories`.`git_repository`=`git_repositories`.`id`" .
+    " JOIN `repository_moves` ON `upstream_repositories`.`id`=`repository_moves`.`upstream_package_repository`" .
+    " JOIN `repositories` AS `sr` ON `sr`.`id`=`repository_moves`.`to_repository`" .
     " WHERE `binary_packages`.`pkgname`=from_base64(\"" . base64_encode($_GET["pkgname"]) . "\")" .
     " AND `architectures`.`name`=from_base64(\"" . base64_encode($_GET["arch"]) . "\")" .
-    " AND `repositories`.`name`=from_base64(\"" . base64_encode($_GET["repo"]) . "\")"
+    " AND `repositories`.`name`=from_base64(\"" . base64_encode($_GET["repo"]) . "\")" .
+    " AND NOT EXISTS (" .
+      "SELECT 1" .
+      " FROM `repository_moves` AS `rm`" .
+      " WHERE `rm`.`from_repository`=`sr`.`id`" .
+    ")"
   );
 
   if ($mysql_result -> num_rows != 1)
@@ -276,14 +284,14 @@ require_once BASE . "/lib/style.php";
   if ($content["uses_modification"]) {
     print "              <li>\n";
     print "                <a href=\"https://git.archlinux32.org/archlinux32/packages/src/branch/master/";
-    print $content["git_repo"];
+    print $content["stable_repo"];
     print "/";
     print $content["pkgbase"];
     print "\" title=\"View archlinux32's source files for ";
     print $content["pkgname"];
     print "\">Archlinux32's Source Files</a> /\n";
     print "                <a href=\"https://git.archlinux32.org/archlinux32/packages/commits/branch/master/";
-    print $content["git_repo"];
+    print $content["stable_repo"];
     print "/";
     print $content["pkgbase"];
     print "\" title=\"View upstream's changes for ";
