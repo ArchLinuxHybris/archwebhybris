@@ -22,7 +22,7 @@ $result = mysql_run_query(
   "`statistics`.`blocked_tasks_count`," .
   "`statistics`.`next_tasks_count`" .
   "FROM `statistics` " .
-  "WHERE `statistics`.`date`>=ADDTIME(NOW()," . $min_time . ") " .
+  "WHERE `statistics`.`date`>=ADDDATE(NOW()," . $min_time . ") " .
   "ORDER BY `statistics`.`date`"
 );
 
