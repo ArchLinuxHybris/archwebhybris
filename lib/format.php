@@ -19,10 +19,10 @@ function export_as_requested($content) {
     if (! isset($_GET["no-headers"]))
       print implode("\t",array_keys($content["tsv"][0])) . "\n";
     print implode(
-      "\n",
+      "",
       array_map(
         function($row){
-          return implode("\t",$row);
+          return implode("\t",$row) . "\n";
         },
         $content["tsv"]
       )
