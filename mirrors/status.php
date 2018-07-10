@@ -2,6 +2,7 @@
 require_once "../init.php";
 
 require_once BASE . "/lib/mysql.php";
+require_once BASE . "/lib/format.php";
 
 $cutoff = 86400;
 
@@ -78,9 +79,4 @@ $content = array(
   "urls" => $urls
 );
 
-if (isset($_GET["json"])) {
-  header ("Content-type: application/json");
-  print json_encode($content,JSON_UNESCAPED_SLASHES);
-} else {
-  print "Unknown output format.";
-}
+export_as_requested($content);
