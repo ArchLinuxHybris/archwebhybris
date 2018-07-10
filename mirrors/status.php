@@ -6,21 +6,6 @@ require_once BASE . "/lib/format.php";
 
 $cutoff = 86400;
 
-mysql_run_query(
-  "CREATE TEMPORARY TABLE `ls` (`id` BIGINT NOT NULL, PRIMARY KEY (`id`))"
-);
-
-mysql_run_query(
-  "INSERT INTO `ls` (`id`)" .
-  " SELECT `ms`.`id`" .
-  " FROM `mirror_statuses` AS `ms`" .
-  " WHERE NOT EXISTS (" .
-    "SELECT 1 FROM `mirror_statuses` AS `n_ms`" .
-    " WHERE `n_ms`.`url`=`ms`.`url`" .
-    " AND `n_ms`.`start`>`ms`.`start`" .
-  ") AND `ms`.`start` > UNIX_TIMESTAMP(NOW())-" . $cutoff
-);
-
 $result = mysql_run_query(
   "SELECT " .
   "`l_ms`.`protocol`," .
@@ -36,11 +21,22 @@ $result = mysql_run_query(
   "`l_ms`.`ipv4`," .
   "`l_ms`.`ipv6`," .
   "`l_ms`.`active`," .
+  "(`l_ms`.`active` AND (`l_ms`.`start` > UNIX_TIMESTAMP(NOW()) - 3600)) AS `recently_active`," .
   "AVG(IF(`a_ms`.`active`,1,0)) AS `completion_pct`," .
   "COUNT(1) AS `count`" .
-  " FROM `ls`" .
-  " JOIN `mirror_statuses` AS `l_ms` ON `ls`.`id`=`l_ms`.`id`" .
-  " JOIN `mirror_statuses` AS `a_ms` ON `a_ms`.`url`=`l_ms`.`url`" .
+  " FROM (" .
+    "SELECT " .
+    "`mirror_statuses`.`url`," .
+    "MAX(`mirror_statuses`.`start`) AS `start`" .
+    " FROM `mirror_statuses`" .
+    " WHERE `mirror_statuses`.`start` > UNIX_TIMESTAMP(NOW())-" . $cutoff .
+    " GROUP BY `mirror_statuses`.`url`" .
+  ") AS `ls`" .
+  " JOIN `mirror_statuses` AS `l_ms`" .
+  " ON `ls`.`url`=`l_ms`.`url`" .
+  " AND `ls`.`start`=`l_ms`.`start`" .
+  " JOIN `mirror_statuses` AS `a_ms`" .
+  " ON `a_ms`.`url`=`l_ms`.`url`" .
   " AND `a_ms`.`start` > UNIX_TIMESTAMP(NOW())-" . $cutoff .
   " GROUP BY `l_ms`.`id`"
 );
@@ -59,7 +55,8 @@ while($row = $result->fetch_assoc()) {
     "isos",
     "ipv4",
     "ipv6",
-    "active"
+    "active",
+    "recently_active"
   ) as $key)
     $row[$key] = floatval($row[$key]);
   $row["last_sync"] = gmdate("Y-m-d\TH:i:s\Z", $row["last_sync"]);
@@ -79,4 +76,9 @@ $content = array(
   "urls" => $urls
 );
 
-export_as_requested($content);
+export_as_requested(
+  array(
+    "json" => $content,
+    "tsv" => $urls
+  )
+);
