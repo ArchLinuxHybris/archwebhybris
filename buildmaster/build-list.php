@@ -376,4 +376,4 @@ foreach($rows as $row) {
 <?php
 }
 
-print_footer("Copyright © 2018 <a href=\"mailto:arch@eckner.net\" title=\"Contact Erich Eckner\">Erich Eckner</a>.");
+print_footer();

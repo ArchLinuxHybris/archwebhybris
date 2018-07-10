@@ -47,4 +47,4 @@ if (isset($last_return))
 if (isset($last_return))
   print "      latest package move was on " . $last_moved . ".<br>\n";
 
-print_footer("Copyright © 2018 <a href=\"mailto:arch@eckner.net\" title=\"Contact Erich Eckner\">Erich Eckner</a>.");
+print_footer();
