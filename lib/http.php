@@ -1,6 +1,5 @@
 <?php
 
-
 # do not include twice
 if (function_exists("throw_http_error"))
   return;
