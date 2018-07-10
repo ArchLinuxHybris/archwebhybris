@@ -123,6 +123,7 @@ require_once BASE . "/lib/format.php";
   $result = mysql_run_query(
     "SELECT " .
     "`binary_packages`.`pkgname`," .
+    "`package_sources`.`pkgbase`," .
     "`repositories`.`name` AS `repo`," .
     "`architectures`.`name` AS `arch`," .
     "CONCAT(IF(`binary_packages`.`epoch`=\"0\",\"\",CONCAT(`binary_packages`.`epoch`,\":\"))," .
@@ -218,6 +219,7 @@ require_once BASE . "/lib/format.php";
   $result = mysql_run_query(
     "SELECT " .
     "`binary_packages`.`pkgname`," .
+    "`package_sources`.`pkgbase`," .
     "`repositories`.`name` AS `repo`," .
     "`architectures`.`name` AS `arch`," .
     "CONCAT(IF(`binary_packages`.`epoch`=\"0\",\"\",CONCAT(`binary_packages`.`epoch`,\":\"))," .
