@@ -5,11 +5,11 @@ require_once BASE . "/lib/mysql.php";
 require_once BASE . "/lib/style.php";
 
 
-  foreach (array("bugs","sort","del") as $expected_param)
+  foreach (array("bugs","sort","del","uses_upstream","uses_modification") as $expected_param)
     if (! isset($_GET[$expected_param]))
       $_GET[$expected_param] = "";
 
-  $search_criteria = array(
+  $multi_select_search_criteria = array(
     "arch" => array(
       "name" => "arch",
       "title" => "CPU architecture",
@@ -28,16 +28,16 @@ require_once BASE . "/lib/style.php";
     )
   );
 
-  foreach ( $search_criteria as $criterium => $content ) {
+  foreach ( $multi_select_search_criteria as $criterium => $content ) {
     $result = mysql_run_query(
       "SELECT `name` FROM `" . $content["table"] . "`" . $content["extra_condition"] . " ORDER BY `name`"
     );
     while ($row = $result -> fetch_assoc())
-      $search_criteria[$criterium]["values"][] = $row["name"];
+      $multi_select_search_criteria[$criterium]["values"][] = $row["name"];
   }
 
   $filter = " WHERE 1";
-  foreach ($search_criteria as $criterium)
+  foreach ($multi_select_search_criteria as $criterium)
     if (isset($_GET[$criterium["name"]])) {
       $filter .= " AND `" . $criterium["table"] . "`.`name` IN (";
       foreach ($criterium["values"] as $value)
@@ -46,15 +46,53 @@ require_once BASE . "/lib/style.php";
       $filter .= "\"\")";
     }
 
-  if ($_GET["bugs"] == "Bugs")
-    $filter .= " AND `binary_packages`.`has_issues`";
-  if ($_GET["bugs"] == "No Bugs")
-    $filter .= " AND NOT `binary_packages`.`has_issues`";
+  $single_select_search_criteria = array(
+    "bugs" => array(
+      "name" => "bugs",
+      "label" => "Bugs",
+      "title" => "bug-tracker status",
+      "options" => array(
+        "All" => "1",
+        "Bugs" => "`binary_packages`.`has_issues`",
+        "No Bugs" => "NOT `binary_packages`.`has_issues`"
+      )
+    ),
+    "del" => array(
+      "name" => "del",
+      "label" => "To Be Deleted",
+      "title" => "to-be-deleted status",
+      "options" => array(
+        "All" => "1",
+        "To Be Deleted" => "`binary_packages_in_repositories`.`is_to_be_deleted`",
+        "Not To Be Deleted" => "NOT `binary_packages_in_repositories`.`is_to_be_deleted`"
+      )
+    ),
+    "uses_upstream" => array(
+      "name" => "uses_upstream",
+      "label" => "Upstream",
+      "title" => "wether upstream source exists",
+      "options" => array(
+        "All" => "1",
+        "Uses Upstream" => "`package_sources`.`uses_upstream`",
+        "Does Not Use Upstream" => "NOT `package_sources`.`uses_upstream`"
+      )
+    ),
+    "uses_modification" => array(
+      "name" => "uses_modification",
+      "label" => "Modification",
+      "title" => "wether modification exists",
+      "options" => array(
+        "All" => "1",
+        "Uses Modification" => "`package_sources`.`uses_modification`",
+        "Does Not Use Modification" => "NOT `package_sources`.`uses_modification`"
+      )
+    )
+  );
 
-  if ($_GET["del"] == "To Be Deleted")
-    $filter .= " AND `binary_packages_in_repositories`.`is_to_be_deleted`";
-  if ($_GET["del"] == "Not To Be Deleted")
-    $filter .= " AND NOT `binary_packages_in_repositories`.`is_to_be_deleted`";
+  foreach ($single_select_search_criteria as $criterium)
+    if (isset($_GET[$criterium["name"]]) &&
+      isset($criterium["options"][$_GET[$criterium["name"]]]))
+      $filter .= " AND " . $criterium["options"][$_GET[$criterium["name"]]];
 
   if (isset($_GET["q"])) {
     $exact_filter = " AND `binary_packages`.`pkgname` = from_base64(\"".base64_encode($_GET["q"])."\")";
@@ -70,6 +108,7 @@ require_once BASE . "/lib/style.php";
     " JOIN `repositories` ON `binary_packages_in_repositories`.`repository`=`repositories`.`id`" .
     " AND `repositories`.`is_on_master_mirror`" .
     " JOIN `build_assignments` ON `build_assignments`.`id`=`binary_packages`.`build_assignment`" .
+    " JOIN `package_sources` ON `package_sources`.`id`=`build_assignments`.`package_source`" .
     $filter . $exact_filter .
     " ORDER BY ";
 
@@ -143,6 +182,7 @@ require_once BASE . "/lib/style.php";
     " JOIN `repositories` ON `binary_packages_in_repositories`.`repository`=`repositories`.`id`" .
     " AND `repositories`.`is_on_master_mirror`" .
     " JOIN `build_assignments` ON `build_assignments`.`id`=`binary_packages`.`build_assignment`" .
+    " JOIN `package_sources` ON `package_sources`.`id`=`build_assignments`.`package_source`" .
     $filter . $fuzzy_filter .
     " ORDER BY ";
 
@@ -311,7 +351,7 @@ require_once BASE . "/lib/style.php";
           <fieldset>
             <legend>Enter search criteria</legend>
 <?php
-  foreach ($search_criteria as $criterium) {
+  foreach ($multi_select_search_criteria as $criterium) {
     print "            <div>\n";
     print "              <label for=\"id_" . $criterium["name"] . "\" title=\"Limit results to a specific " . $criterium["title"] . "\">";
     print $criterium["label"];
@@ -334,38 +374,35 @@ if (isset($_GET["q"]))
   print "value=\"".$_GET["q"]."\"";
 ?>/>
             </div>
-            <div>
-              <label for="id_bugs" title="Limit results based on bug-tracker status">Bugs</label><select id="id_bugs" name="bugs">
 <?php
-  $bugs_drop_down = array("All", "Bugs", "No Bugs");
-  foreach ($bugs_drop_down as $label) {
-    print "                <option value=\"";
-    if ($label != "All")
-      print $label;
-    print "\"";
-    if ($_GET["bugs"]==$label)
-      print " selected=\"selected\"";
-    print ">" . $label . "</option>\n";
+  foreach ($single_select_search_criteria as $criterium) {
+
+    print "            <div>\n";
+    print "              <label for=\"id_";
+    print $criterium["name"];
+    print "\" title=\"Limit results based on ";
+    print $criterium["title"];
+    print "\">";
+    print $criterium["label"];
+    print "</label><select id=\"id_";
+    print $criterium["name"];
+    print "\" name=\"";
+    print $criterium["name"];
+    print "\">\n";
+
+    foreach ($criterium["options"] as $label => $option) {
+      print "                <option value=\"";
+      if ($label != "All")
+        print $label;
+      print "\"";
+      if ($_GET[$criterium["name"]]==$label)
+        print " selected=\"selected\"";
+      print ">" . $label . "</option>\n";
+    }
+    print "              </select>\n";
+    print "            </div>\n";
   }
 ?>
-              </select>
-            </div>
-            <div>
-              <label for="id_del" title="Limit results based on to-be-deleted flag">Delete</label><select id="id_del" name="del">
-<?php
-  $del_drop_down = array("All", "To Be Deleted", "Not To Be Deleted");
-  foreach ($del_drop_down as $label) {
-    print "                <option value=\"";
-    if ($label != "All")
-      print $label;
-    print "\"";
-    if ($_GET["del"]==$label)
-      print " selected=\"selected\"";
-    print ">" . $label . "</option>\n";
-  }
-?>
-              </select>
-            </div>
             <div>
               <label>&nbsp;</label>
               <input title="Search for packages using this criteria" type="submit" value="Search">
