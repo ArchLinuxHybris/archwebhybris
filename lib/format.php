@@ -28,6 +28,26 @@ function export_as_requested($content) {
       )
     );
   } else {
-    throw_http_error(406,"Not Acceptable","Unknown output format.");
+    throw_http_error(
+      406,
+      "Not Acceptable",
+      implode(
+        "<br>\n",
+        array_merge(
+          array(
+            "Unknown output format.",
+            "Accepted:"
+          ),
+          array_map(
+            function($type){
+              return "<a href=\"?" . $type . "\">" . $type . "</a>";
+            },
+            array_keys(
+              $content
+            )
+          )
+        )
+      )
+    );
   }
 }
