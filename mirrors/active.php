@@ -35,7 +35,8 @@ while($row = $result->fetch_assoc()) {
     "isos",
     "ipv4",
     "ipv6",
-    "active"
+    "active",
+    "recently_active"
   ) as $key)
     $row[$key] = floatval($row[$key]);
   foreach (array(
