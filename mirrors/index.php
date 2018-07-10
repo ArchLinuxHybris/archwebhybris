@@ -6,21 +6,6 @@ require_once BASE . "/lib/style.php";
 
 $cutoff = 3600;
 
-mysql_run_query(
-  "CREATE TEMPORARY TABLE `ls` (`id` BIGINT NOT NULL, PRIMARY KEY (`id`))"
-);
-
-mysql_run_query(
-  "INSERT INTO `ls` (`id`)" .
-  " SELECT `ms`.`id`" .
-  " FROM `mirror_statuses` AS `ms`" .
-  " WHERE NOT EXISTS (" .
-    "SELECT 1 FROM `mirror_statuses` AS `n_ms`" .
-    " WHERE `n_ms`.`url`=`ms`.`url`" .
-    " AND `n_ms`.`start`>`ms`.`start`" .
-  ") AND `ms`.`start` > UNIX_TIMESTAMP(NOW())-" . $cutoff
-);
-
 $result = mysql_run_query(
   "SELECT " .
   "GROUP_CONCAT(`l_ms`.`protocol`) AS `protocols`," .
@@ -30,8 +15,17 @@ $result = mysql_run_query(
   "`l_ms`.`isos`," .
   "`l_ms`.`ipv4`," .
   "`l_ms`.`ipv6`" .
-  " FROM `ls`" .
-  " JOIN `mirror_statuses` AS `l_ms` ON `ls`.`id`=`l_ms`.`id`" .
+  " FROM (" .
+    "SELECT " .
+    "`mirror_statuses`.`url`," .
+    "MAX(`mirror_statuses`.`start`) AS `start`" .
+    " FROM `mirror_statuses`" .
+    " WHERE `mirror_statuses`.`start` > UNIX_TIMESTAMP(NOW())-" . $cutoff .
+    " GROUP BY `mirror_statuses`.`url`" .
+  ") AS `ls`" .
+  " JOIN `mirror_statuses` AS `l_ms`" .
+  " ON `ls`.`url`=`l_ms`.`url`" .
+  " AND `ls`.`start`=`l_ms`.`start`" .
   " GROUP BY SUBSTRING(`l_ms`.`url`,LENGTH(`l_ms`.`protocol`)+4)"
 );
 
