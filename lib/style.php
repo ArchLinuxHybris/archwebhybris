@@ -45,7 +45,7 @@ function print_footer() {
 ?>
       <div id="footer">
         <p>
-          Copyright © 2002-2018 <a href=\"mailto:jvinet@zeroflux.org\" title=\"Contact Judd Vinet\">Judd Vinet</a> and <a href=\"mailto:aaron@archlinux.org\" title=\"Contact Aaron Griffin\">Aaron Griffin</a>.
+          Copyright © 2002-2018 <a href="mailto:jvinet@zeroflux.org" title="Contact Judd Vinet">Judd Vinet</a> and <a href="mailto:aaron@archlinux.org" title="Contact Aaron Griffin">Aaron Griffin</a>.
           Copyright © 2018 <a href="mailto:arch@eckner.net" title="Contact Erich Eckner">Erich Eckner</a>.
         </p>
         <p>
