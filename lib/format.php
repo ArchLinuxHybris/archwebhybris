@@ -8,6 +8,11 @@ require_once "../init.php";
 include_once BASE . "/lib/http.php";
 
 function export_as_requested($content) {
+  if (isset($content["All"])) {
+    $content["json"]=$content["All"];
+    $content["tsv"]=$content["All"];
+    unset($content["All"]);
+  }
   if (isset($content["json"]) && isset($_GET["json"])) {
     header ("Content-type: application/json");
     print json_encode(
