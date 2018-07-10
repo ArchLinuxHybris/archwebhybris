@@ -3,6 +3,7 @@ require_once "../init.php";
 
 require_once BASE . "/lib/mysql.php";
 require_once BASE . "/lib/style.php";
+require_once BASE . "/lib/format.php";
 
 
   foreach (array("bugs","sort","del","uses_upstream","uses_modification") as $expected_param)
@@ -339,6 +340,24 @@ require_once BASE . "/lib/style.php";
     };
     print "        </div>\n";
 
+  };
+
+  if (isset($_GET["exact"])) {
+    export_as_requested(
+      array(
+        "All" => $exact_matches
+      )
+    );
+    die();
+  };
+
+  if (isset($_GET["fuzzy"])) {
+    export_as_requested(
+      array(
+        "All" => $fuzzy_matches
+      )
+    );
+    die();
   };
 
   print_header("Package Search");
