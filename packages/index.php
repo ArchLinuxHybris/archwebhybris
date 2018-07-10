@@ -37,6 +37,11 @@ require_once BASE . "/lib/format.php";
       $multi_select_search_criteria[$criterium]["values"][] = $row["name"];
   }
 
+  $float_columns = array(
+    "has_issues",
+    "is_to_be_deleted"
+  );
+
   $filter = " WHERE 1";
   foreach ($multi_select_search_criteria as $criterium)
     if (isset($_GET[$criterium["name"]])) {
@@ -131,8 +136,11 @@ require_once BASE . "/lib/format.php";
     $query
   );
   $exact_matches = array();
-  while ($row = $result -> fetch_assoc())
+  while ($row = $result -> fetch_assoc()) {
+    foreach ($float_columns as $float_column)
+      $row[$float_column] = floatval($row[$float_column]);
     $exact_matches[] = $row;
+  }
 
   $sorts = array(
     "arch" => array(
@@ -224,8 +232,11 @@ require_once BASE . "/lib/format.php";
     " LIMIT " . (($page-1)*100) . ", 100"
   );
   $fuzzy_matches = array();
-  while ($row = $result -> fetch_assoc())
+  while ($row = $result -> fetch_assoc()) {
+    foreach ($float_columns as $float_column)
+      $row[$float_column] = floatval($row[$float_column]);
     $fuzzy_matches[] = $row;
+  }
 
   function print_results($results) {
     $oddity="odd";
