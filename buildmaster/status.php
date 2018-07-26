@@ -37,33 +37,102 @@ if ($result -> num_rows > 0) {
   $last_moved = $result["last_moved"];
 }
 
-$result = mysql_run_query(
-  "SELECT " .
-  "STDDEV(UNIX_TIMESTAMP(NOW())-UNIX_TIMESTAMP(`binary_packages_in_repositories`.`first_last_moved`)) AS `stddev`," .
-  "AVG(UNIX_TIMESTAMP(NOW())-UNIX_TIMESTAMP(`binary_packages_in_repositories`.`first_last_moved`)) AS `avg`" .
-  " FROM `binary_packages`" .
-  " JOIN (" .
-    "SELECT " .
-    "`binary_packages_in_repositories`.`package`," .
-    "MIN(`binary_packages_in_repositories`.`last_moved`) AS `first_last_moved`" .
-    " FROM `binary_packages_in_repositories`" .
-    " JOIN `repositories`" .
-    " ON `binary_packages_in_repositories`.`repository`=`repositories`.`id`" .
-    " JOIN `repository_stabilities`" .
-    " ON `repositories`.`stability`=`repository_stabilities`.`id`" .
-    " WHERE `repository_stabilities`.`name`=\"testing\"" .
-    " GROUP BY `binary_packages_in_repositories`.`package`" .
-  ") AS `binary_packages_in_repositories`" .
-  " ON `binary_packages_in_repositories`.`package`=`binary_packages`.`id`" .
-  " WHERE NOT `binary_packages`.`has_issues`" .
-  " AND NOT `binary_packages`.`is_tested`"
+$age_queries = array(
+  array(
+    "label" => "age of build-list-packages",
+    "column" => "`package_sources`.`commit_time`",
+    "table" =>
+      "`package_sources`" .
+      " JOIN (" .
+        "SELECT " .
+        "`build_assignments`.`package_source`" .
+        " FROM `build_assignments`" .
+        " JOIN `binary_packages`" .
+        " ON `binary_packages`.`build_assignment`=`build_assignments`.`id`" .
+        " JOIN `binary_packages_in_repositories`" .
+        " ON `binary_packages_in_repositories`.`package`=`binary_packages`.`id`" .
+        " JOIN `repositories`" .
+        " ON `binary_packages_in_repositories`.`repository`=`repositories`.`id`" .
+        " WHERE `repositories`.`name`=\"build-list\"" .
+        " AND `build_assignments`.`is_blocked` IS NULL" .
+        " GROUP BY `build_assignments`.`package_source`" .
+      ") AS `build_assignments_grouped`" .
+      " ON `build_assignments_grouped`.`package_source`=`package_sources`.`id`"
+  ),
+  array(
+    "label" => "age of staging-packages",
+    "column" => "`binary_packages_in_repositories`.`first_last_moved`",
+    "table" =>
+      "`binary_packages`" .
+      " JOIN (" .
+        "SELECT " .
+        "`binary_packages_in_repositories`.`package`," .
+        "MIN(`binary_packages_in_repositories`.`last_moved`) AS `first_last_moved`" .
+        " FROM `binary_packages_in_repositories`" .
+        " JOIN `repositories`" .
+        " ON `binary_packages_in_repositories`.`repository`=`repositories`.`id`" .
+        " JOIN `repository_stabilities`" .
+        " ON `repositories`.`stability`=`repository_stabilities`.`id`" .
+        " WHERE `repository_stabilities`.`name`=\"staging\"" .
+        " GROUP BY `binary_packages_in_repositories`.`package`" .
+      ") AS `binary_packages_in_repositories`" .
+      " ON `binary_packages_in_repositories`.`package`=`binary_packages`.`id`"
+  ),
+  array(
+    "label" => "age of testing-packages",
+    "column" => "`binary_packages_in_repositories`.`first_last_moved`",
+    "table" =>
+      "`binary_packages`" .
+      " JOIN (" .
+        "SELECT " .
+        "`binary_packages_in_repositories`.`package`," .
+        "MIN(`binary_packages_in_repositories`.`last_moved`) AS `first_last_moved`" .
+        " FROM `binary_packages_in_repositories`" .
+        " JOIN `repositories`" .
+        " ON `binary_packages_in_repositories`.`repository`=`repositories`.`id`" .
+        " JOIN `repository_stabilities`" .
+        " ON `repositories`.`stability`=`repository_stabilities`.`id`" .
+        " WHERE `repository_stabilities`.`name`=\"testing\"" .
+        " GROUP BY `binary_packages_in_repositories`.`package`" .
+      ") AS `binary_packages_in_repositories`" .
+      " ON `binary_packages_in_repositories`.`package`=`binary_packages`.`id`" .
+      " WHERE NOT `binary_packages`.`has_issues`" .
+      " AND NOT `binary_packages`.`is_tested`"
+  ),
+  array(
+    "label" => "age of tested-packages",
+    "column" => "`binary_packages_in_repositories`.`first_last_moved`",
+    "table" =>
+      "`binary_packages`" .
+      " JOIN (" .
+        "SELECT " .
+        "`binary_packages_in_repositories`.`package`," .
+        "MIN(`binary_packages_in_repositories`.`last_moved`) AS `first_last_moved`" .
+        " FROM `binary_packages_in_repositories`" .
+        " JOIN `repositories`" .
+        " ON `binary_packages_in_repositories`.`repository`=`repositories`.`id`" .
+        " JOIN `repository_stabilities`" .
+        " ON `repositories`.`stability`=`repository_stabilities`.`id`" .
+        " WHERE `repository_stabilities`.`name`=\"testing\"" .
+        " GROUP BY `binary_packages_in_repositories`.`package`" .
+      ") AS `binary_packages_in_repositories`" .
+      " ON `binary_packages_in_repositories`.`package`=`binary_packages`.`id`"
+  )
 );
 
-if ($result -> num_rows > 0) {
-  $result = $result->fetch_assoc();
-  foreach ($result as $key => $val)
-    $testing[$key] = format_time_duration($val);
-}
+foreach ($age_queries as $age_query) {
+  $result = mysql_run_query(
+    "SELECT " .
+    "AVG(UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(" . $age_query["column"] . ")) AS `avg`," .
+    "STDDEV(UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(" . $age_query["column"] . ")) AS `stddev`" .
+    " FROM " . $age_query["table"]
+  );
+  if ($result -> num_rows > 0) {
+    $result = $result->fetch_assoc();
+    foreach ($result as $key => $val)
+      $ages[$age_query["label"]][$key] = format_time_duration($val);
+  };
+};
 
 print_header("Build Master Status");
 
@@ -76,9 +145,9 @@ if (isset($last_return))
 if (isset($last_moved))
   print "      latest package move was on " . $last_moved . ".<br>\n";
 
-if (isset($testing))
-  print "      age of testing-packages: " . 
-    $testing["avg"] . " &pm; " . 
-    $testing["stddev"] . ".<br>\n";
+foreach ($ages as $label => $value)
+  print "      " . $label . ": " .
+    $value["avg"] . " &pm; " .
+    $value["stddev"] . ".<br>\n";
 
 print_footer();
