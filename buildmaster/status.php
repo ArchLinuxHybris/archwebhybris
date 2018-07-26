@@ -44,7 +44,7 @@ if (isset($last_commit))
 if (isset($last_return))
   print "      latest built package is from " . $last_return . ".<br>\n";
 
-if (isset($last_return))
+if (isset($last_moved))
   print "      latest package move was on " . $last_moved . ".<br>\n";
 
 print_footer();
