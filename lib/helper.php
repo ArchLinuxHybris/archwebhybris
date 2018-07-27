@@ -92,7 +92,7 @@ function git_url($repository,$type,$commit,$path,$line = null,$commit_is_hash = 
     $git_available =
       preg_match(
         "/ 200 OK$/",
-        get_headers("https://git.archlinux32.org/archlinux32/packagess")[0]
+        get_headers("https://git.archlinux32.org/archlinux32/packages")[0]
       ) == 1;
   }
   if (!isset($commit_is_hash))
