@@ -87,13 +87,19 @@ function format_time_duration($val) {
 
 function git_url($repository,$type,$commit,$path,$line = null,$commit_is_hash = null) {
   global $git_available;
-  # TODO: we might want to cache this value (with memcached ?)
   if (!isset($git_available)) {
-    $git_available =
-      preg_match(
-        "/ 200 OK$/",
-        get_headers("https://git.archlinux32.org/archlinux32/packages")[0]
-      ) == 1;
+    $memcache = new Memcache;
+    $memcache->connect('localhost', 11211) or die ('Memcached Connection Error');
+    $git_available = $memcache->get('git_available');
+    if ($git_available === false) {
+      $git_available =
+        preg_match(
+          "/ 200 OK$/",
+          get_headers("https://git.archlinux32.org/archlinux32/packages")[0]
+        );
+      $memcache->set('git_available',$git_available,0,120);
+    };
+    $git_available = $git_available == 1;
   }
   if (!isset($commit_is_hash))
     $commit_is_hash = preg_match("/^[0-9a-f]{40}$/",$commit)==1;
