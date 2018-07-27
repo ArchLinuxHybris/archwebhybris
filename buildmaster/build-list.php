@@ -88,7 +88,9 @@ $columns = array(
             "packages",
             "tree",
             "\",`ba_q`.`mod_git_revision`,\"",
-            "\",`ba_q`.`package_repository`,\"/\",`ba_q`.`pkgbase`,\""
+            "\",`ba_q`.`package_repository`,\"/\",`ba_q`.`pkgbase`,\"",
+            null,
+            true
           ) .
           "\\\">\"," .
           "`ba_q`.`mod_git_revision`," .
