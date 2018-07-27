@@ -83,4 +83,76 @@ function format_time_duration($val) {
         $result
       );
   return $result;
-}
+};
+
+function git_url($repository,$type,$commit,$path,$line = null,$commit_is_hash = null) {
+  global $git_available;
+  # TODO: we might want to cache this value (with memcached ?)
+  if (!isset($git_available)) {
+    $git_available =
+      preg_match(
+        "/ 200 OK$/",
+        get_headers("https://git.archlinux32.org/archlinux32/packagess")[0]
+      ) == 1;
+  }
+  if (!isset($commit_is_hash))
+    $commit_is_hash = preg_match("/^[0-9a-f]{40}$/",$commit)==1;
+  if ($git_available) {
+    if (isset($line))
+      $line = "#L" . $line;
+    else
+      $line = "";
+    if ($commit_is_hash)
+      $commit = "commit/" . $commit;
+    else
+      $commit = "branch/" . $commit;
+    switch ($type) {
+      case "tree":
+        return
+          "https://git.archlinux32.org/archlinux32/" .
+          $repository .
+          "/src/" .
+          $commit .
+          "/" .
+          $path .
+          $line;
+      case "log":
+        return
+          "https://git.archlinux32.org/archlinux32/" .
+          $repository .
+          "/commits/" .
+          $commit .
+          "/" .
+          $path .
+          $line;
+    }
+
+  } else {
+    if (isset($line))
+      $line = "#n" . $line;
+    else
+      $line = "";
+    if ($commit_is_hash)
+      $commit = "?id=" . $commit;
+    else
+      $commit = "?h=" . $commit;
+    switch ($type) {
+      case "tree":
+        return
+          "https://git2.archlinux32.org/Archlinux32/" .
+          $repository .
+          "/tree/" .
+          $path .
+          $commit .
+          $line;
+      case "log":
+        return
+          "https://git2.archlinux32.org/Archlinux32/" .
+          $repository .
+          "/log/" .
+          $path .
+          $commit .
+          $line;
+    }
+  };
+};

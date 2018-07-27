@@ -1,5 +1,7 @@
 <?php
 require_once "../init.php";
+
+include BASE . "/lib/helper.php";
 include BASE . "/lib/mysql.php";
 
 $result = mysql_run_query(
@@ -76,7 +78,9 @@ if (isset($_GET["graph"])) {
     while ($row = $result->fetch_assoc()) {
       print "<a href=\"#TODO" . $row["id"] . "\" name=\"TODO" . $row["id"] ."\">TODO #" . $row["id"] . "</a>";
       print " - ";
-      print "<a href=\"https://git.archlinux32.org/archlinux32/builder/src/branch/master/" . $row["file"] . "#L" . $row["line"] . "\">" . $row["file"] . "(line " . $row["line"] . ")</a>";
+      print "<a href=\"";
+      print git_url("builder","tree","master",$row["file"],$row["line"]);
+      print "\">" . $row["file"] . "(line " . $row["line"] . ")</a>";
       print ":<br>\n";
       print str_replace("\\n","<br>\n",$row["description"]);
       print "<br>\n";

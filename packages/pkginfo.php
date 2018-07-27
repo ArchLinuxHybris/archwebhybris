@@ -1,6 +1,7 @@
 <?php
 require_once "../init.php";
 
+require_once BASE . "/lib/helper.php";
 require_once BASE . "/lib/mysql.php";
 require_once BASE . "/lib/style.php";
 
@@ -283,17 +284,13 @@ require_once BASE . "/lib/style.php";
   }
   if ($content["uses_modification"]) {
     print "              <li>\n";
-    print "                <a href=\"https://git.archlinux32.org/archlinux32/packages/src/branch/master/";
-    print $content["stable_repo"];
-    print "/";
-    print $content["pkgbase"];
+    print "                <a href=\"";
+    print git_url("packages","tree","master",$content["stable_repo"]."/".$content["pkgbase"]);
     print "\" title=\"View archlinux32's source files for ";
     print $content["pkgname"];
     print "\">Archlinux32's Source Files</a> /\n";
-    print "                <a href=\"https://git.archlinux32.org/archlinux32/packages/commits/branch/master/";
-    print $content["stable_repo"];
-    print "/";
-    print $content["pkgbase"];
+    print "                <a href=\"";
+    print git_url("packages","log","master",$content["stable_repo"]."/".$content["pkgbase"]);
     print "\" title=\"View upstream's changes for ";
     print $content["pkgname"];
     print "\">Archlinux32's Changes</a>\n";

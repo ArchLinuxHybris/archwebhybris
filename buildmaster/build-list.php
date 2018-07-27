@@ -1,6 +1,7 @@
 <?php
 require_once "../init.php";
 
+require_once BASE . "/lib/helper.php";
 require_once BASE . "/lib/mysql.php";
 require_once BASE . "/lib/style.php";
 
@@ -82,13 +83,14 @@ $columns = array(
     "mysql_query" =>
       "IF(`ba_q`.`uses_modification`," .
         "CONCAT(" .
-          "\"<a href=\\\"https://git.archlinux32.org/archlinux32/packages/src/commit/\"," .
-          "`ba_q`.`mod_git_revision`," .
-          "\"/\"," .
-          "`ba_q`.`package_repository`," .
-          "\"/\"," .
-          "`ba_q`.`pkgbase`," .
-          "\"\\\">\"," .
+          "\"<a href=\\\"" .
+          git_url(
+            "packages",
+            "tree",
+            "\",`ba_q`.`mod_git_revision`,\"",
+            "\",`ba_q`.`package_repository`,\"/\",`ba_q`.`pkgbase`,\""
+          ) .
+          "\\\">\"," .
           "`ba_q`.`mod_git_revision`," .
           "\"</a>\"" .
         ")," .
