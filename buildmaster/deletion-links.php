@@ -10,10 +10,20 @@ if (isset($_GET["show_all"]))
 else
   $available_filter = "";
 
-$available = explode(
-  "\n",
-  shell_exec("find /var/lib/pacman/ -name '*.db' -exec tar -tzf {} \; | sed -n 's,-[^-]\+-[^-]\+/$,,;T;p' | sort -u")
-);
+$memcache = new Memcache;
+$memcache->connect('localhost', 11211) or die ('Memcached Connection Error');
+$available_upstream_packages = $memcache->get('available_upstream_packages');
+if ($available_upstream_packages === false) {
+  $available_upstream_packages = explode(
+    "\n",
+    shell_exec(
+      "find /var/lib/pacman/ -name '*.db' -exec tar -tzf {} \; " .
+      "| sed -n 's,-[^-]\+-[^-]\+/$,,;T;p' " .
+      "| sort -u"
+    )
+  );
+  $memcache->set('available_upstream_packages',$available_upstream_packages,0,1800);
+}
 
 mysql_run_query(
   "CREATE TEMPORARY TABLE `available` (" .
@@ -24,7 +34,7 @@ mysql_run_query(
 
 mysql_run_query(
   "INSERT INTO `available` (`pkgname`) VALUES (\"" .
-  implode(array_map("base64_encode", $available), "\"),(\"") .
+  implode(array_map("base64_encode", $available_upstream_packages), "\"),(\"") .
   "\")"
 );
 
