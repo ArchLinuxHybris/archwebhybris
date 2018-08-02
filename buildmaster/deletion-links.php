@@ -10,6 +10,11 @@ if (isset($_GET["show_all"]))
 else
   $available_filter = "";
 
+if (isset($_GET["pkgname"]))
+  $filter = " AND `binary_packages`.`pkgname` REGEXP from_base64(\"" . base64_encode($_GET["pkgname"]) . "\")";
+else
+  $filter = "";
+
 $memcache = new Memcache;
 $memcache->connect('localhost', 11211) or die ('Memcached Connection Error');
 $available_upstream_packages = $memcache->get('available_upstream_packages');
@@ -74,7 +79,8 @@ mysql_run_query(
   $available_filter .
   " JOIN `available` ON `available`.`pkgname`=`binary_packages`.`pkgname`" .
   " WHERE `binary_packages_in_repositories`.`is_to_be_deleted`" .
-  " AND `binary_packages`.`pkgname` NOT LIKE \"lib32-%\""
+  " AND `binary_packages`.`pkgname` NOT LIKE \"lib32-%\"" .
+  $filter
 );
 
 mysql_run_query(
