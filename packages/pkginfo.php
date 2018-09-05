@@ -92,11 +92,28 @@ require_once BASE . "/lib/style.php";
       "\"  \\\"is_to_be_deleted\\\": \\\"\",IF(`binary_packages_in_repositories`.`is_to_be_deleted`,\"1\",\"0\"),\"\\\"\\n\"," .
       "\"}\"" .
     ")) AS `deps`," .
+    "IF(" .
+      "`versions`.`order`=1 AND `dependencies`.`version_relation`=\">=\"," .
+      "\"\"," .
+      "CONCAT(" .
+        "`dependencies`.`version_relation`," .
+        "IF(" .
+          "`versions`.`epoch`=0," .
+          "\"\"," .
+          "CONCAT(" .
+            "`versions`.`epoch`," .
+            "\":\"" .
+          ")" .
+        ")," .
+        "`versions`.`version`" .
+      ")" .
+    ") AS `version`," .
     "`install_targets`.`name` AS `install_target`" .
     " FROM `dependencies`" .
     " JOIN `dependency_types` ON `dependency_types`.`id`=`dependencies`.`dependency_type`" .
     " JOIN `install_targets` ON `install_targets`.`id`=`dependencies`.`depending_on`" .
     " AND `install_targets`.`name` NOT IN (\"base\",\"base-devel\")" .
+    " JOIN `versions` ON `versions`.`id`=`dependencies`.`version`" .
     " LEFT JOIN (" .
       "`install_target_providers`" .
       " JOIN `binary_packages` ON `install_target_providers`.`package`=`binary_packages`.`id`" .
@@ -120,7 +137,7 @@ require_once BASE . "/lib/style.php";
       " AND `subst_rsr`.`more_stable`=`repositories`.`stability`" .
       " AND `subst_rsr2`.`less_stable`=" . $mysql_content["repo_stability"] .
     ")" .
-    " GROUP BY `install_targets`.`id`,`dependency_types`.`id`" .
+    " GROUP BY CONCAT(`install_targets`.`id`,\"-\",`versions`.`id`),`dependency_types`.`id`" .
     " ORDER BY FIELD (`dependency_types`.`name`,\"run\",\"make\",\"check\",\"link\"), `install_targets`.`name`"
   );
 
@@ -464,7 +481,7 @@ if (count($elsewhere)>0) {
     if (!isset ($dep["json"]))
       print "                (in database only)\n";
     if (count($dep["deps"]) == 0) {
-      print "                <font color=\"#ff0000\">not satisfiable dependency: \"" . $dep["install_target"] . "\"</font>\n";
+      print "                <font color=\"#ff0000\">not satisfiable dependency: \"" . $dep["install_target"] . $dep["version"] . "\"</font>\n";
     } else {
       $virtual_dep = (
         (count($dep["deps"]) > 1) ||
@@ -472,7 +489,7 @@ if (count($elsewhere)>0) {
       );
       print "                ";
       if ($virtual_dep) {
-        print $dep["install_target"];
+        print $dep["install_target"] . $dep["version"];
         print " <span class=\"virtual-dep\">(";
       };
       $first = true;
@@ -488,6 +505,8 @@ if (count($elsewhere)>0) {
         if ($d_p["is_to_be_deleted"])
           print "</s>";
         print "</a>";
+        if (!$virtual_dep)
+          print $dep["version"];
       }
       if ($virtual_dep)
         print ")</span>";
