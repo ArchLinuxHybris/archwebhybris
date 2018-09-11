@@ -21,7 +21,7 @@ $columns = array(
   "currently_building" => array(
     "label" => "currently building",
     "mysql_name" => "cb",
-    "mysql_query" => "`package_sources`.`pkgbase`",
+    "mysql_query" => "CONCAT(`architectures`.`name`,\"/\",`package_sources`.`pkgbase`)",
     "sort" => "currently_building",
     "title" => "pkgbase of currently building package"
   ),
@@ -89,6 +89,8 @@ $result = mysql_run_query(
     " FROM `build_assignments`" .
     " JOIN `package_sources`" .
     " ON `build_assignments`.`package_source`=`package_sources`.`id`" .
+    " JOIN `architectures`" .
+    " ON `build_assignments`.`architecture`=`architectures`.`id`" .
 
     " RIGHT JOIN `build_slaves`" .
     " ON `build_slaves`.`currently_building`=`build_assignments`.`id`" .
