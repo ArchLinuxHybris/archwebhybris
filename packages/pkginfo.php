@@ -19,7 +19,7 @@ require_once BASE . "/lib/style.php";
   $json_content = $json_content["package"];
 
   $mysql_result = mysql_run_query(
-    "SELECT DISTINCT " .
+    "SELECT " .
     "`binary_packages`.`id`," .
     "`binary_packages`.`pkgname`," .
     "`package_sources`.`pkgbase`," .
@@ -36,7 +36,7 @@ require_once BASE . "/lib/style.php";
     "`git_repositories`.`name` AS `git_repo`," .
     "`package_sources`.`uses_upstream`," .
     "`package_sources`.`uses_modification`," .
-    "`binary_packages_in_repositories`.`last_moved`," .
+    "MAX(`binary_packages_in_repositories`.`last_moved`)," .
     "`sr`.`name` AS `stable_repo`" .
     " FROM `binary_packages`" .
     " JOIN `architectures` ON `binary_packages`.`architecture`=`architectures`.`id`" .
@@ -56,7 +56,8 @@ require_once BASE . "/lib/style.php";
       "SELECT 1" .
       " FROM `repository_moves` AS `rm`" .
       " WHERE `rm`.`from_repository`=`sr`.`id`" .
-    ")"
+    ")" .
+    " GROUP BY `binary_packages`.`id`"
   );
 
   if ($mysql_result -> num_rows != 1)
