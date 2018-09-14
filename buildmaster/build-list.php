@@ -13,7 +13,7 @@ else
 $to_shows = array(
   "all" => "",
   "broken" => " WHERE (`ba_q`.`is_broken` OR `ba_q`.`is_blocked` IS NOT NULL)",
-  "next" => " WHERE (`loops` IS NOT NULL OR `dependencies_pending` IS NULL)"
+  "next" => " WHERE (`l_q`.`loops` IS NOT NULL OR (`rd_q`.`run_dependencies_pending` IS NULL AND `md_q`.`make_dependencies_pending` IS NULL))"
 );
 
 $columns = array(
@@ -27,7 +27,7 @@ $columns = array(
   "deps" => array(
     "label" => "Deps",
     "mysql_name" => "dependencies_pending",
-    "mysql_query" => "IFNULL(`d_q`.`dependencies_pending`,0)",
+    "mysql_query" => "IFNULL(`rd_q`.`run_dependencies_pending`,0)+IFNULL(`md_q`.`make_dependencies_pending`,0)",
     "sort" => "deps",
     "title" => "number of dependencies on the build-list"
   ),
@@ -206,19 +206,40 @@ $result = mysql_run_query(
   " (" .
     "SELECT " .
     "`dependent_bp`.`build_assignment`," .
-    "COUNT(DISTINCT `dependency_bp`.`build_assignment`) AS `dependencies_pending`" .
+    "COUNT(DISTINCT `dependency_bp`.`build_assignment`) AS `run_dependencies_pending`" .
     " FROM `binary_packages` AS `dependent_bp`" .
-    " JOIN `dependencies` ON `dependencies`.`dependent` = `dependent_bp`.`id` " .
+    " JOIN `dependencies` ON `dependencies`.`dependent` = `dependent_bp`.`id`" .
     " JOIN `dependency_types` ON `dependencies`.`dependency_type` = `dependency_types`.`id`" .
-    " JOIN `install_target_providers` ON `install_target_providers`.`install_target` = `dependencies`.`depending_on` " .
-    " JOIN `binary_packages` AS `dependency_bp` ON `dependency_bp`.`id` = `install_target_providers`.`package` " .
-    " JOIN `binary_packages_in_repositories` ON `dependency_bp`.`id` = `binary_packages_in_repositories`.`package` " .
-    " JOIN `repositories` ON `binary_packages_in_repositories`.`repository` = `repositories`.`id` " .
+    " JOIN `install_target_providers` ON `install_target_providers`.`install_target` = `dependencies`.`depending_on`" .
+    " JOIN `binary_packages` AS `dependency_bp` ON `dependency_bp`.`id` = `install_target_providers`.`package`" .
+    " JOIN `binary_packages_in_repositories` ON `dependency_bp`.`id` = `binary_packages_in_repositories`.`package`" .
+    " JOIN `repositories` ON `binary_packages_in_repositories`.`repository` = `repositories`.`id`" .
     " WHERE `dependency_bp`.`build_assignment` != `dependent_bp`.`build_assignment`" .
     " AND `dependency_types`.`relevant_for_building`" .
+    " AND `dependency_types`.`relevant_for_binary_packages`" .
     " AND `repositories`.`name`=\"build-list\"" .
     " GROUP BY `dependent_bp`.`build_assignment`" .
-  ") AS `d_q` ON `d_q`.`build_assignment`=`ba_q`.`id`" .
+  ") AS `rd_q` ON `rd_q`.`build_assignment`=`ba_q`.`id`" .
+  " LEFT JOIN" .
+  " (" .
+    "SELECT " .
+    "`dependent_bp`.`build_assignment`," .
+    "COUNT(DISTINCT `dependencies`.`id`) AS `make_dependencies_pending`" .
+    " FROM `binary_packages` AS `dependent_bp`" .
+    " JOIN `dependencies` ON `dependencies`.`dependent` = `dependent_bp`.`id`" .
+    " JOIN `dependency_types` ON `dependencies`.`dependency_type` = `dependency_types`.`id`" .
+    " WHERE NOT EXISTS(" .
+      "SELECT 1 FROM `install_target_providers`" .
+      " JOIN `binary_packages` AS `dependency_bp` ON `dependency_bp`.`id` = `install_target_providers`.`package`" .
+      " JOIN `binary_packages_in_repositories` ON `dependency_bp`.`id` = `binary_packages_in_repositories`.`package`" .
+      " JOIN `repositories` ON `binary_packages_in_repositories`.`repository` = `repositories`.`id`" .
+      " WHERE `install_target_providers`.`install_target` = `dependencies`.`depending_on`" .
+      " AND `repositories`.`is_on_master_mirror`" .
+    ")" .
+    " AND `dependency_types`.`relevant_for_building`" .
+    " AND NOT `dependency_types`.`relevant_for_binary_packages`" .
+    " GROUP BY `dependent_bp`.`build_assignment`" .
+  ") AS `md_q` ON `md_q`.`build_assignment`=`ba_q`.`id`" .
   " LEFT JOIN" .
   " (" .
     "SELECT " .
