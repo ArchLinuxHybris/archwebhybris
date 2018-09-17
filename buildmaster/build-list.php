@@ -5,16 +5,81 @@ require_once BASE . "/lib/helper.php";
 require_once BASE . "/lib/mysql.php";
 require_once BASE . "/lib/style.php";
 
-if (isset($_GET["show"]))
-  $to_show=$_GET["show"];
+if (isset($_GET["q"]))
+  $filter = " WHERE `ba_q`.`pkgbase` LIKE from_base64(\"".base64_encode("%".$_GET["q"]."%")."\")";
 else
-  $to_show="all";
+  $filter = " WHERE 1";
 
-$to_shows = array(
-  "all" => "",
-  "broken" => " WHERE (`ba_q`.`is_broken` OR `ba_q`.`is_blocked` IS NOT NULL)",
-  "next" => " WHERE (`l_q`.`loops` IS NOT NULL OR (`rd_q`.`run_dependencies_pending` IS NULL AND `md_q`.`make_dependencies_pending` IS NULL))"
+$multi_select_search_criteria = array(
+  "arch" => array(
+    "name" => "arch",
+    "title" => "CPU architecture",
+    "label" => "Arch",
+    "source_table" => "architectures",
+    "query_pre" => "`ba_q`.`arch` IN (",
+    "query_in_pre" => "\"",
+    "query_in_post" => "\",",
+    "query_post" => "\"\")",
+    "values" => array()
+  ),
+  "failures" => array(
+    "name" => "failures",
+    "title" => "Fail Reasons",
+    "label" => "Failures",
+    "source_table" => "fail_reasons",
+    "query_pre" => "(0",
+    "query_in_pre" => " OR `fr_q`.`fail_reasons_raw` LIKE \"%,",
+    "query_in_post" => ",%\"",
+    "query_post" => ")",
+    "values" => array()
+  )
 );
+
+foreach ( $multi_select_search_criteria as $criterium => $content ) {
+  $result = mysql_run_query(
+    "SELECT `name` FROM `" . $content["source_table"] . "` ORDER BY `name`"
+  );
+  while ($row = $result -> fetch_assoc())
+    $multi_select_search_criteria[$criterium]["values"][] = $row["name"];
+}
+
+foreach ( $multi_select_search_criteria as $criterium ) {
+  if (isset($_GET[$criterium["name"]])) {
+    $filter .= " AND " . $criterium["query_pre"];
+    foreach ($criterium["values"] as $value)
+      if (strpos("&" . $_SERVER["QUERY_STRING"] . "&", "&" . $criterium["name"] . "=" . $value . "&") !== false)
+        $filter .= $criterium["query_in_pre"] . $value . $criterium["query_in_post"];
+    $filter .= $criterium["query_post"];
+  }
+}
+
+$single_select_search_criteria = array(
+  "broken" => array(
+    "name" => "broken",
+    "label" => "Is Broken",
+    "title" => "is broken",
+    "options" => array(
+      "All" => "1",
+      "Broken" => "(`ba_q`.`is_broken` OR `ba_q`.`is_blocked` IS NOT NULL)",
+      "Not Broken" => "NOT (`ba_q`.`is_broken` OR `ba_q`.`is_blocked` IS NOT NULL)"
+    )
+  ),
+  "next" => array(
+    "name" => "next",
+    "label" => "Can Be Built",
+    "title" => "can be built",
+    "options" => array(
+      "All" => "1",
+      "Can" => "(`l_q`.`loops` IS NOT NULL OR (`rd_q`.`run_dependencies_pending` IS NULL AND `md_q`.`make_dependencies_pending` IS NULL))",
+      "Can't" => "NOT (`l_q`.`loops` IS NOT NULL OR (`rd_q`.`run_dependencies_pending` IS NULL AND `md_q`.`make_dependencies_pending` IS NULL))"
+    )
+  )
+);
+
+foreach ($single_select_search_criteria as $criterium)
+  if (isset($_GET[$criterium["name"]]) &&
+    isset($criterium["options"][$_GET[$criterium["name"]]]))
+    $filter .= " AND " . $criterium["options"][$_GET[$criterium["name"]]];
 
 $columns = array(
   "priority" => array(
@@ -132,7 +197,7 @@ $columns = array(
   "failure" => array(
     "label" => "Failures",
     "mysql_name" => "fail_reasons",
-    "mysql_query" => "`fr_q`.`fail_reasons`",
+    "mysql_query" => "`fr_q`.`fail_reasons_print`",
     "sort" => "failure",
     "title" => "reason of build failure"
   ),
@@ -152,7 +217,6 @@ $columns = array(
   )
 );
 
-$match = $to_shows[$to_show];
 if (!isset($_GET["sort"]))
   $_GET["sort"]="trials";
 
@@ -261,7 +325,14 @@ $result = mysql_run_query(
         "\"</a>\"" .
       ")" .
       " ORDER BY `fail_reasons`.`name`" .
-    ") AS `fail_reasons`" .
+    ") AS `fail_reasons_print`," .
+    "CONCAT(" .
+      "\",\"," .
+      "GROUP_CONCAT(" .
+        "`fail_reasons`.`name`" .
+      ")," .
+      "\",\"" .
+    ") AS `fail_reasons_raw`" .
     " FROM (" .
       "SELECT " .
       "`failed_builds`.`build_assignment`," .
@@ -299,7 +370,7 @@ $result = mysql_run_query(
     " FROM `build_slaves`" .
     " GROUP BY `build_slaves`.`currently_building`" .
   ") AS `bs_q` ON `bs_q`.`currently_building`=`ba_q`.`id`" .
-  $match .
+  $filter .
   " ORDER BY " . $order . "`trials` " . $direction . ",`dependencies_pending` " . $direction . ",`is_blocked` " . $direction . ",`pkgbase` " . $direction
 );
 
@@ -329,9 +400,78 @@ while($row = $result->fetch_assoc()) {
   $count++;
 }
 
-print_header("List of " . strtoupper(substr($to_show,0,1)) . substr($to_show,1) . " Package Builds");
+print_header("List of Package Builds");
 
-print "<a href=\"https://buildmaster.archlinux32.org/build-logs/\">build logs</a>\n";
+?>
+      <a href="https://buildmaster.archlinux32.org/build-logs/">build logs</a>
+      <div id="pkglist-search" class="box filter-criteria">
+        <h2>Package Build Search</h2>
+        <form id="pkg-search" method="get" action="/buildmaster/build-list.php">
+          <p><input id="id_sort" name="sort" type="hidden" /></p>
+          <fieldset>
+            <legend>Enter search criteria</legend>
+<?php
+
+foreach ($multi_select_search_criteria as $criterium) {
+  print "            <div>\n";
+  print "              <label for=\"id_" . $criterium["name"] . "\" title=\"Limit results to a specific " . $criterium["title"] . "\">";
+  print $criterium["label"];
+  print "</label>\n";
+  print "              <select multiple=\"multiple\" id=\"id_" . $criterium["name"] . "\" name=\"" . $criterium["name"] . "\">\n";
+  foreach ($criterium["values"] as $value) {
+    print "                <option value=\"" . $value . "\"";
+    if (strpos( "&" . $_SERVER["QUERY_STRING"] . "&", "&" . $criterium["name"] . "=" . $value . "&") !== false)
+      print " selected=\"selected\"";
+    print ">" . $value . "</option>\n";
+  }
+  print "              </select>\n";
+  print "            </div>\n";
+}
+
+?>
+            <div>
+              <label for="id_q" title="Enter keywords as desired">Keywords</label>
+              <input id="id_q" name="q" size="30" type="text" <?php
+if (isset($_GET["q"]))
+  print "value=\"".$_GET["q"]."\"";
+?>/>
+            </div>
+<?php
+
+foreach ($single_select_search_criteria as $criterium) {
+  print "            <div>\n";
+  print "              <label for=\"id_";
+  print $criterium["name"];
+  print "\" title=\"Limit results based on ";
+  print $criterium["title"];
+  print "\">";
+  print $criterium["label"];
+  print "</label><select id=\"id_";
+  print $criterium["name"];
+  print "\" name=\"";
+  print $criterium["name"];
+  print "\">\n";
+  foreach ($criterium["options"] as $label => $option) {
+    print "                <option value=\"";
+    if ($label != "All")
+      print $label;
+    print "\"";
+    if ($_GET[$criterium["name"]]==$label)
+      print " selected=\"selected\"";
+    print ">" . $label . "</option>\n";
+  }
+  print "              </select>\n";
+  print "            </div>\n";
+}
+?>
+            <div>
+              <label>&nbsp;</label>
+              <input title="Search for packages using this criteria" type="submit" value="Search">
+            </div>
+          </fieldset>
+        </form>
+      </div>
+<?php
 
 foreach ($to_shows as $link => $dummy) {
   print "-\n";
