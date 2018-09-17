@@ -473,16 +473,6 @@ foreach ($single_select_search_criteria as $criterium) {
       </div>
 <?php
 
-foreach ($to_shows as $link => $dummy) {
-  print "-\n";
-  if ($link != $to_show)
-    print "<a href=\"?show=" . $link . "\">";
-  print $link . " package builds";
-  if ($link != $to_show)
-    print "</a>";
-  print "\n";
-}
-
 if ($count > 0) {
 
 ?>
@@ -495,7 +485,15 @@ if ($count > 0) {
 foreach ($columns as $column) {
 
   print "            <th>\n";
-  print "              <a href=\"?show=" . $to_show . "&sort=";
+  print "              <a href=\"?";
+  print substr(
+    str_replace(
+      "&sort=".$_GET["sort"]."&",
+      "&",
+      "&" . $_SERVER["QUERY_STRING"] . "&"
+    ),
+    1
+  ) . "sort=";
   if ($column["sort"] == $_GET["sort"])
     print "-";
   print $column["sort"] . "\" ";
