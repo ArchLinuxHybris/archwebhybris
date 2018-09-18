@@ -5,10 +5,15 @@ require_once BASE . "/lib/helper.php";
 require_once BASE . "/lib/mysql.php";
 require_once BASE . "/lib/style.php";
 
+$filter = " WHERE ";
+
+if (isset($_GET["invq"]))
+  $filter .= "NOT ";
+
 if (isset($_GET["q"]))
-  $filter = " WHERE `ba_q`.`pkgbase` LIKE from_base64(\"".base64_encode("%".$_GET["q"]."%")."\")";
+  $filter .= "`ba_q`.`pkgbase` LIKE from_base64(\"".base64_encode("%".$_GET["q"]."%")."\")";
 else
-  $filter = " WHERE 1";
+  $filter .= "1";
 
 $multi_select_search_criteria = array(
   "arch" => array(
@@ -434,7 +439,12 @@ foreach ($multi_select_search_criteria as $criterium) {
               <input id="id_q" name="q" size="30" type="text" <?php
 if (isset($_GET["q"]))
   print "value=\"".$_GET["q"]."\"";
-?>/>
+?>/><br>
+              <input id="id_invq" name="invq" type="checkbox" value="invq" title="list all non-matching package builds"<?php
+if (isset($_GET["invq"]))
+  print " checked";
+?>>
+              invert match
             </div>
 <?php
 
